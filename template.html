@@ -1,0 +1,2486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Politiskel</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg:            #f4f4f2;
+    --surface:       #fcfcfb;
+    --border:        #e2e1dd;
+    --grid:          #eceae5;
+    --axis:          #8f8d86;
+    --text:          #0b0b0b;
+    --text-2:        #52514e;
+    --text-3:        #7d7b75;
+    --series-1:      #2a78d6;
+    --series-1-soft: #cde2fb;
+    --ref-ink:       #8a8880;
+    --warn:          #ec835a;
+    --focus:         #2a78d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg:            #121211;
+      --surface:       #1a1a19;
+      --border:        #343430;
+      --grid:          #2a2a27;
+      --axis:          #6e6d66;
+      --text:          #ffffff;
+      --text-2:        #c3c2b7;
+      --text-3:        #8f8e85;
+      --series-1:      #3987e5;
+      --series-1-soft: #184f95;
+      --ref-ink:       #86847c;
+      --warn:          #ec835a;
+      --focus:         #3987e5;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg:            #121211;
+    --surface:       #1a1a19;
+    --border:        #343430;
+    --grid:          #2a2a27;
+    --axis:          #6e6d66;
+    --text:          #ffffff;
+    --text-2:        #c3c2b7;
+    --text-3:        #8f8e85;
+    --series-1:      #3987e5;
+    --series-1-soft: #184f95;
+    --ref-ink:       #86847c;
+    --warn:          #ec835a;
+    --focus:         #3987e5;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    padding: 24px 20px 64px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1440px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 0.95rem; margin: 0 0 12px; }
+  h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em;
+       color: var(--text-3); font-weight: 600; margin: 0 0 10px; }
+  p.subtitle { color: var(--text-2); margin: 0 0 20px; max-width: 70ch; }
+
+  /* ------------------------------------------------------- site header --- */
+  .masthead {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 14px 24px; padding: 0 0 18px; margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 13px; min-width: 0; }
+  .brand .mark { flex: none; }
+  .brand h1 { font-size: 1.32rem; margin: 0; letter-spacing: -0.015em; }
+  .brand .tag { font-size: 0.83rem; color: var(--text-2); margin: 1px 0 0; }
+  .masthead nav { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .masthead nav a {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.82rem; color: var(--text-2); text-decoration: none;
+    padding: 6px 11px; border: 1px solid var(--border); border-radius: 7px;
+  }
+  .masthead nav a:hover { color: var(--text); border-color: var(--text-3); }
+  .masthead nav a svg { flex: none; }
+
+  /* ----------------------------------------------------------- pied de page --- */
+  footer.site {
+    margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border);
+    color: var(--text-2); font-size: 0.83rem;
+  }
+  footer.site .cols {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 22px 32px;
+  }
+  footer.site h2 {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--text-3); font-weight: 600; margin: 0 0 7px;
+  }
+  footer.site p { margin: 0 0 6px; }
+  footer.site ul { list-style: none; margin: 0; padding: 0; }
+  footer.site li { margin-bottom: 5px; }
+  footer.site a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--border); }
+  footer.site a:hover { border-bottom-color: var(--text-3); }
+  footer.site .fine {
+    margin-top: 22px; padding-top: 14px; border-top: 1px solid var(--border);
+    font-size: 0.78rem; color: var(--text-3);
+  }
+  @media (max-width: 560px) {
+    .masthead { flex-direction: column; align-items: flex-start; }
+  }
+
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
+    margin-bottom: 16px; padding: 10px 14px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  }
+  .controls label { display: inline-flex; align-items: center; gap: 7px;
+                    font-size: 0.85rem; color: var(--text-2); cursor: pointer; }
+  .controls input[type=checkbox] { accent-color: var(--series-1); width: 15px; height: 15px; }
+
+  .layout {
+    display: grid;
+    /* the table needs more room than the chart: seven columns, two of them
+       textual, against a fixed-ratio square */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 24px;
+    align-items: start;
+  }
+  /* without min-width:0 the nowrap table forces the column past the viewport */
+  .layout > * { min-width: 0; }
+  @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .card + .card { margin-top: 20px; }
+
+  .plot { position: relative; }
+  svg#compass { width: 100%; height: auto; display: block; overflow: hidden; }
+
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .axis-line { stroke: var(--axis); stroke-width: 1.5; }
+  .axis-head { fill: var(--axis); }
+  .plot-frame { fill: none; stroke: var(--border); stroke-width: 1; }
+  .axis-cap   { fill: var(--text-2); font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
+  .quad-cap   { fill: var(--text-3); font-size: 10px; letter-spacing: 0.04em; }
+  .tick-cap   { fill: var(--text-3); font-size: 9px; font-variant-numeric: tabular-nums; }
+
+  .ref-mark  { fill: none; stroke: var(--ref-ink); stroke-width: 1.5; }
+  .ref-label { fill: var(--text-3); font-size: 9.5px;
+               paint-order: stroke fill; stroke: var(--surface); stroke-width: 3px;
+               stroke-linejoin: round; }
+  .pt-ring   { fill: none; stroke: var(--surface); stroke-width: 2; }
+  .pt-dot    { fill: var(--series-1); }
+  .pt-label  { fill: var(--text); font-size: 10.5px; font-weight: 600;
+               paint-order: stroke fill; stroke: var(--surface); stroke-width: 3.5px;
+               stroke-linejoin: round; }
+  .hit { fill: transparent; cursor: pointer; outline: none; }
+  .hit:focus-visible + .pt-ring, g.on .pt-ring { stroke: var(--focus); }
+  g.on .pt-dot { r: 8.5; }
+
+  /* selection: everything else recedes, the comparison comes forward */
+  .ref-hit { fill: transparent; cursor: pointer; outline: none; }
+  #points-layer g, #refs-layer g { transition: opacity 0.12s ease; }
+  #points-layer.dim g:not(.sel), #refs-layer.dim g:not(.sel) { opacity: 0.22; }
+  g.sel .pt-dot { r: 9; }
+  g.sel .ref-mark { stroke: var(--series-1); stroke-width: 2.5; }
+  g.sel .ref-label { fill: var(--text); }
+  .sel-ring   { fill: none; stroke: var(--series-1); stroke-width: 1; opacity: 0.34; }
+  .sel-disc   { fill: var(--series-1); opacity: 0.05; }
+  .sel-ring-cap { fill: var(--series-1); font-size: 8.5px; opacity: 0.75;
+                  paint-order: stroke fill; stroke: var(--surface); stroke-width: 3px;
+                  stroke-linejoin: round; }
+  .link-line  { stroke: var(--series-1); stroke-width: 1; opacity: 0.42; }
+  .centroid      { fill: none; stroke: var(--text-2); stroke-width: 1.5; }
+  .centroid-cap  { fill: var(--text-2); font-size: 9.5px; font-weight: 600;
+                   paint-order: stroke fill; stroke: var(--surface); stroke-width: 3px;
+                   stroke-linejoin: round; }
+
+  /* panneau de distances */
+  tbody tr { cursor: pointer; }
+  tbody tr.sel td { background: var(--series-1-soft); }
+  #detail-table td, #detail-table th { padding: 5px 8px; }
+  #detail-table tr.self td { background: var(--series-1-soft); }
+  .bar-cell { width: 100%; min-width: 90px; padding-right: 0 !important; }
+  .bar { height: 7px; border-radius: 0 3px 3px 0; background: var(--series-1);
+         min-width: 2px; opacity: 0.85; }
+  .bar.far { opacity: 0.32; }
+  .rank { color: var(--text-3); font-variant-numeric: tabular-nums;
+          width: 1.4rem; text-align: right; }
+  .fit-pill { font-size: 0.7rem; color: var(--text-3); }
+  .far-note { font-style: italic; }
+  td .fam.far { color: var(--text-2); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px;
+            font-size: 0.8rem; color: var(--text-2); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+
+  .tip {
+    position: absolute; pointer-events: none; z-index: 5;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 9px 11px; min-width: 170px; max-width: 250px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+    font-size: 0.78rem; line-height: 1.45; color: var(--text-2);
+  }
+  .tip[hidden] { display: none !important; }
+  .tip b { display: block; color: var(--text); font-size: 0.86rem; margin-bottom: 4px; }
+  .tip dl { display: grid; grid-template-columns: auto 1fr; gap: 1px 10px; margin: 0; }
+  .tip dt { color: var(--text-3); }
+  .tip dd { margin: 0; color: var(--text); font-weight: 600;
+            font-variant-numeric: tabular-nums; text-align: right; }
+  .tip .near { margin: 6px 0 0; padding-top: 6px; border-top: 1px solid var(--border); }
+
+  .table-scroll { overflow-x: auto; margin: 0 -18px; padding: 0 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th, td { padding: 8px 7px; text-align: left; border-bottom: 1px solid var(--border);
+           white-space: nowrap; }
+  th { color: var(--text-3); font-weight: 600; font-size: 0.72rem;
+       text-transform: uppercase; letter-spacing: 0.05em; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.on td { background: var(--series-1-soft); }
+  td .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+               background: var(--series-1); margin-right: 7px; vertical-align: -1px; }
+  td .fam { white-space: normal; }
+  .tag { font-size: 0.7rem; color: var(--text-3); }
+
+  /* per-axis strips: one row per PolitiScales axis, every profile on it */
+  .strip { display: grid; grid-template-columns: minmax(0, 17ch) 1fr minmax(0, 17ch) 4.5ch;
+           align-items: center; gap: 14px; padding: 8px 0; }
+  .strip + .strip { border-top: 1px solid var(--border); }
+  .strip .pole { font-size: 0.78rem; color: var(--text-2); }
+  .strip .pole.r { text-align: right; }
+  .strip .sd { font-size: 0.72rem; color: var(--text-3); text-align: right;
+               font-variant-numeric: tabular-nums; }
+  .track { position: relative; height: 26px; }
+  .track::before { content: ""; position: absolute; left: 0; right: 0; top: 50%;
+                   height: 1px; background: var(--border); }
+  .track .zero { position: absolute; left: 50%; top: 3px; bottom: 3px;
+                 width: 1px; background: var(--axis); }
+  .track .mean { position: absolute; top: 1px; bottom: 1px; width: 2px;
+                 margin-left: -1px; background: var(--text-2); opacity: 0.55;
+                 border-radius: 1px; pointer-events: none; }
+  .track .mean::after { content: ""; position: absolute; left: -3px; top: -3px;
+                        border: 4px solid transparent; border-top-color: var(--text-2);
+                        opacity: 0.75; }
+  /* uncertainty band: the span the neutral share would cover if it tipped
+     entirely one way or the other */
+  /* The uncertainty band is only shown on demand: ten overlapping bands per
+     row made an unreadable wash. */
+  .track .band { position: absolute; top: 50%; height: 7px; margin-top: -3.5px;
+                 background: var(--series-1); opacity: 0; border-radius: 4px;
+                 pointer-events: none; transition: opacity .1s ease; }
+  .track .band.on, .track .band.hi { opacity: 0.40; }
+  .strips.hov .pt:not(:hover) { opacity: 0.4; }
+  .track .pt { position: absolute; top: 50%; width: 11px; height: 11px;
+               margin: -5.5px 0 0 -5.5px; border-radius: 50%; background: var(--series-1);
+               box-shadow: 0 0 0 2px var(--surface); cursor: pointer; }
+  .track .pt.on { z-index: 3; width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px; }
+  .strips.dim .pt:not(.on) { opacity: 0.2; }
+  #strips-card { position: relative; }
+  .tip-strip {
+    position: absolute; z-index: 8;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; min-width: 210px; max-width: 280px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+    font-size: 0.78rem; line-height: 1.5; color: var(--text-2);
+  }
+  .tip-strip[hidden] { display: none !important; }
+  .track .pt.multi { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--series-1-soft); }
+  .tip-strip .row {
+    display: block; width: 100%; text-align: left; background: none; border: none;
+    font: inherit; color: inherit; padding: 6px 7px; margin: 0; border-radius: 6px;
+    cursor: pointer;
+  }
+  .tip-strip .row + .row { margin-top: 2px; }
+  .tip-strip .row:hover, .tip-strip .row:focus-visible { background: var(--bg); outline: none; }
+  .tip-strip .row .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .tip-strip .row .who { color: var(--text); font-weight: 600; font-size: 0.84rem; }
+  .tip-strip .row .val { color: var(--text); font-weight: 600;
+                         font-variant-numeric: tabular-nums; font-size: 0.8rem; }
+  .tip-strip .row .det { color: var(--text-3); font-size: 0.72rem; margin-top: 2px; }
+  .tip-strip .more { color: var(--text-3); font-size: 0.72rem; margin: 2px 0 6px; }
+  .tip-strip b { display: block; color: var(--text); font-size: 0.86rem; margin-bottom: 2px; }
+  .tip-strip .ax { color: var(--text-3); margin-bottom: 7px; }
+  .tip-strip .seg { display: flex; height: 9px; border-radius: 3px; overflow: hidden;
+                    margin: 7px 0 5px; background: var(--bg); }
+  .tip-strip .seg i { display: block; }
+  .tip-strip .seg .l { background: var(--series-1); }
+  .tip-strip .seg .n { background: var(--border); }
+  .tip-strip .seg .r { background: var(--series-1); opacity: 0.45; }
+  .tip-strip dl { display: grid; grid-template-columns: auto 1fr; gap: 1px 10px; margin: 0; }
+  .tip-strip dt { color: var(--text-3); }
+  .tip-strip dd { margin: 0; color: var(--text); font-weight: 600;
+                  font-variant-numeric: tabular-nums; text-align: right; }
+  .strip-head { display: grid; grid-template-columns: minmax(0, 17ch) 1fr minmax(0, 17ch) 4.5ch;
+                gap: 14px; font-size: 0.7rem; text-transform: uppercase;
+                letter-spacing: 0.05em; color: var(--text-3); padding-bottom: 8px;
+                border-bottom: 1px solid var(--border); }
+  .strip-head .c { text-align: center; }
+  .strip-head .r { text-align: right; }
+  @media (max-width: 720px) {
+    .strip, .strip-head { grid-template-columns: 1fr; gap: 4px; }
+    .strip .pole.r, .strip .sd, .strip-head .r, .strip-head .c { text-align: left; }
+  }
+
+  /* drapeau, devise, concepts */
+  .flag {
+    display: inline-block; width: 26px; height: 15px; border-radius: 2px;
+    margin-right: 8px; vertical-align: -3px; object-fit: cover;
+    border: 1px solid var(--border); background: var(--bg);
+  }
+  .flag.lg { width: 68px; height: 38px; margin: 0; vertical-align: middle; }
+  .devise { color: var(--text-3); font-size: 0.76rem; margin-left: 34px;
+            white-space: normal; }
+  .who-cell { line-height: 1.35; }
+  .devise.none { color: var(--text-3); font-style: italic; }
+  .concepts { display: flex; flex-wrap: wrap; gap: 5px; margin: 0; padding: 0; list-style: none; }
+  .concepts li {
+    font-size: 0.75rem; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--text-2); white-space: nowrap;
+  }
+  .concepts li b { color: var(--text); font-weight: 600; }
+  .concepts li i { font-style: normal; color: var(--text-3); }
+  .id-card { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+  .id-card .meta { min-width: 0; }
+  .id-card .meta .d { font-size: 0.9rem; color: var(--text); margin: 0 0 7px; }
+
+  /* screenshot import */
+  .drop {
+    display: block;
+    border: 1px dashed var(--border); border-radius: 10px; padding: 18px 16px;
+    text-align: center; color: var(--text-2); font-size: 0.85rem;
+    background: var(--bg); cursor: pointer; transition: border-color .12s, background .12s;
+  }
+  .drop:hover, .drop.over { border-color: var(--series-1); background: var(--series-1-soft); }
+  .drop strong { display: block; color: var(--text); margin-bottom: 3px; }
+  .drop input[type=file] { display: none; }
+  .drop-note { font-size: 0.75rem; color: var(--text-3); margin: 9px 0 0; }
+  .capture-ok {
+    display: flex; gap: 12px; align-items: center; margin-top: 12px;
+    padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg); font-size: 0.82rem;
+  }
+  .capture-ok[hidden] { display: none !important; }
+  .capture-ok .who { color: var(--text); font-weight: 600; }
+  .del {
+    background: none; border: none; color: var(--text-3); cursor: pointer;
+    font-size: 1rem; line-height: 1; padding: 2px 6px; border-radius: 4px; margin: 0;
+  }
+  .del:hover { background: var(--border); color: var(--text); }
+  .empty { color: var(--text-3); padding: 16px 10px; }
+
+  fieldset { border: none; padding: 0; margin: 0 0 10px; }
+  .axis-row {
+    display: grid; grid-template-columns: 1fr 64px 64px; gap: 10px;
+    align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border);
+  }
+  .axis-row:last-of-type { border-bottom: none; }
+  .axis-row .poles { font-size: 0.8rem; color: var(--text-2); min-width: 0; }
+  .axis-row .poles em { font-style: normal; color: var(--text); }
+  .axis-row.over .poles { color: var(--warn); }
+  .axis-row .col-head { font-size: 0.68rem; text-transform: uppercase;
+                        letter-spacing: 0.05em; color: var(--text-3); text-align: center; }
+  input[type=text], input[type=number] {
+    width: 100%; padding: 6px 8px; font: inherit; font-size: 0.85rem;
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+  }
+  input[type=number] { text-align: right; font-variant-numeric: tabular-nums; }
+  input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; border-color: transparent; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 0.72rem; text-transform: uppercase;
+                 letter-spacing: 0.05em; color: var(--text-3); font-weight: 600; margin-bottom: 5px; }
+  .hint { font-size: 0.75rem; color: var(--text-3); margin: 0 0 12px; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; align-items: center; }
+  button.primary {
+    background: var(--series-1); color: #fff; border: none; border-radius: 7px;
+    padding: 9px 16px; font: inherit; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+  }
+  button.primary:hover { filter: brightness(1.08); }
+  button.ghost {
+    background: none; color: var(--text-2); border: 1px solid var(--border);
+    border-radius: 7px; padding: 9px 14px; font: inherit; font-size: 0.85rem; cursor: pointer;
+  }
+  button.ghost:hover { background: var(--bg); color: var(--text); }
+  .error { color: var(--warn); font-size: 0.8rem; margin: 10px 0 0; }
+  .error[hidden] { display: none !important; }
+
+  details.method { margin-top: 20px; }
+  details.method summary { cursor: pointer; font-size: 0.8rem; color: var(--text-2);
+                           font-weight: 600; }
+  details.method .body { font-size: 0.8rem; color: var(--text-2); margin-top: 10px; }
+  details.method code { background: var(--bg); padding: 1px 5px; border-radius: 4px;
+                        font-size: 0.95em; }
+  details.method ul { margin: 6px 0; padding-left: 18px; }
+</style>
+  <!-- Extracteur et données sont recopiés ICI par tools/extract.js, entre les
+       repères ci-dessous. La page est donc autonome : aucun fichier annexe à
+       charger, rien qui dépende des règles file:// du navigateur, et un seul
+       fichier à transmettre. Sources : tools/politi-dissect.js + politi-results/. -->
+  <script>
+/* POLITI-EXTRACTOR:START */
+"use strict";
+/* Reads a PolitiScales result out of a screenshot.
+
+   Shared file: loaded as-is by the browser (<script src>) and by Node
+   (require). It only needs an image object {width, height, data} in RGBA —
+   which is what canvas.getImageData and tools/lib/png.js both hand back.
+
+   Principle: percentages are read from bar GEOMETRY, not by OCR — a 5%
+   segment carries no label at all and would be unreadable otherwise. A
+   segment's width is exactly proportional to its percentage.
+
+   Careful: the three segments summing to 100% proves NOTHING. The neutral
+   share is derived (track − left − right), so that sum is true by
+   construction. One screenshot came out wrong on two axes with perfect sums.
+   The real check compares the derived neutral against the gap actually
+   measured between the two segments — see below. */
+(function (global) {
+
+  /* The 8 axes, in the order PolitiScales lays them out. `color` is only
+     used to resolve the ambiguous 100% case: a single full-width bar gives no
+     positional clue about which side it belongs to. */
+  const AXES = [
+    { neg: "ess",  pos: "cst",   labels: ["Constructivisme", "Essentialisme"],
+      color: [[155, 49, 177], [52, 182, 52]] },
+    { neg: "pun",  pos: "rehab", labels: ["Justice réhabilitative", "Justice punitive"],
+      color: [[76, 190, 225], [230, 204, 39]] },
+    { neg: "csv",  pos: "prg",   labels: ["Progressisme", "Conservatisme"],
+      color: [[133, 1, 131], [151, 0, 0]] },
+    { neg: "nat",  pos: "int",   labels: ["Internationalisme", "Nationalisme"],
+      color: [[63, 111, 253], [255, 134, 2]] },
+    { neg: "com",  pos: "cap",   labels: ["Communisme", "Capitalisme"],
+      color: [[204, 39, 25], [255, 185, 4]] },
+    { neg: "reg",  pos: "laf",   labels: ["Régulation", "Laissez-faire"],
+      color: [[38, 155, 50], [102, 8, 192]] },
+    { neg: "eco",  pos: "prod",  labels: ["Écologie", "Productivisme"],
+      color: [[160, 233, 13], [77, 234, 233]] },
+    { neg: "ref",  pos: "rev",   labels: ["Révolution", "Réformisme"],
+      color: [[221, 55, 103], [17, 228, 201]] }
+  ];
+  /* left key / right key, as they appear in the image */
+  const SIDE = [["cst", "ess"], ["rehab", "pun"], ["prg", "csv"], ["int", "nat"],
+                ["com", "cap"], ["reg", "laf"], ["eco", "prod"], ["rev", "ref"]];
+
+  const SAT_DELTA = 45, SAT_MIN = 60;
+
+  function reader(img) {
+    const { width: W, data: D } = img;
+    return (x, y) => { const i = (y * W + x) * 4; return [D[i], D[i + 1], D[i + 2]]; };
+  }
+  const saturated = p => {
+    const mx = Math.max(p[0], p[1], p[2]), mn = Math.min(p[0], p[1], p[2]);
+    return mx - mn > SAT_DELTA && mx > SAT_MIN;
+  };
+  const dist2 = (a, b) =>
+    (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2;
+
+  /* Runs of rows where more than `frac` of the width is saturated. */
+  function horizontalBands(img, at, frac, minH) {
+    const { width: W, height: H } = img;
+    const bands = []; let start = -1;
+    for (let y = 0; y < H; y++) {
+      let n = 0;
+      for (let x = 0; x < W; x++) if (saturated(at(x, y))) n++;
+      const on = n > W * frac;
+      if (on && start < 0) start = y;
+      else if (!on && start >= 0) { if (y - start >= minH) bands.push([start, y - 1]); start = -1; }
+    }
+    if (start >= 0 && H - start >= minH) bands.push([start, H - 1]);
+    return bands;
+  }
+
+  /* For one band, the x ranges belonging to a coloured segment. A column
+     counts as soon as a handful of its rows are saturated, measured over the
+     bar's WHOLE height: the white percentage glyphs never span the bar top to
+     bottom, so coloured pixels always remain above and below each one.
+     Requiring a majority of rows instead chops the segment at every digit.
+     The neutral segment and the 2px separators are saturated on no row. */
+  function runsOf(img, at, band) {
+    const { width: W } = img;
+    const y0 = band[0] + 2, y1 = band[1] - 2;
+    const need = Math.max(2, Math.round((y1 - y0 + 1) * 0.08));
+    const runs = []; let start = -1;
+    for (let x = 0; x < W; x++) {
+      let n = 0;
+      for (let y = y0; y <= y1; y++) if (saturated(at(x, y))) n++;
+      const on = n >= need;
+      if (on && start < 0) start = x;
+      else if (!on && start >= 0) { if (x - start > 2) runs.push([start, x - 1]); start = -1; }
+    }
+    if (start >= 0) runs.push([start, W - 1]);
+    return { runs, y0, y1 };
+  }
+
+  function meanColor(at, run, y0, y1) {
+    let r = 0, g = 0, b = 0, n = 0;
+    for (let x = run[0] + 2; x <= run[1] - 2; x++)
+      for (let y = y0; y <= y1; y++) {
+        const p = at(x, y);
+        if (saturated(p)) { r += p[0]; g += p[1]; b += p[2]; n++; }
+      }
+    return n ? [r / n, g / n, b / n] : null;
+  }
+
+  /* A column's representative colour: median of the bar's pixels, ignoring
+     white text and black outlines. */
+  function columnColor(at, x, y0, y1) {
+    const R = [], G = [], B = [];
+    for (let y = y0; y <= y1; y++) {
+      const p = at(x, y);
+      const mx = Math.max(p[0], p[1], p[2]), mn = Math.min(p[0], p[1], p[2]);
+      if (mn > 245) continue;                       /* pure white text */
+      if (mx < 60) continue;                        /* black outline */
+      R.push(p[0]); G.push(p[1]); B.push(p[2]);
+    }
+    if (!R.length) return null;
+    const med = a => { a.sort((u, v) => u - v); return a[a.length >> 1]; };
+    return [med(R), med(G), med(B)];
+  }
+
+  /* Precise segment boundaries: every column of the track is assigned to
+     whichever colour it is closest to — left segment, neutral background, or
+     right segment. Finding edges by saturation favoured vivid hues (acid
+     green held its edge, pale cyan lost it), which shifted both ends by
+     several pixels as soon as the screenshot was not at scale 1. */
+  function segmentEdges(at, y0, y1, trackL, trackR, first, last, bg) {
+    const cL = columnColor(at, (first[0] + first[1]) >> 1, y0, y1);
+    const cR = columnColor(at, (last[0] + last[1]) >> 1, y0, y1);
+    if (!cL || !cR || !bg) return null;
+    const cls = x => {
+      const c = columnColor(at, x, y0, y1);
+      if (!c) return "n";
+      const dl = dist2(c, cL), dn = dist2(c, bg), dr = dist2(c, cR);
+      return dl <= dn && dl <= dr ? "l" : (dr <= dn ? "r" : "n");
+    };
+    /* Start from inside each segment: the track's caps are rounded, hence
+       mostly background, so a scan working inwards from the ends would stop
+       immediately. */
+    let bL = first[1];
+    if (cls(bL) === "l") { while (bL + 1 <= trackR && cls(bL + 1) === "l") bL++; }
+    else { while (bL > trackL && cls(bL) !== "l") bL--; }
+    let bR = last[0];
+    if (cls(bR) === "r") { while (bR - 1 >= trackL && cls(bR - 1) === "r") bR--; }
+    else { while (bR < trackR && cls(bR) !== "r") bR++; }
+    if (bL >= bR) return null;
+    return { left: bL - trackL + 1, right: trackR - bR + 1 };
+  }
+
+  /* Spreads 100 points across three widths (largest-remainder method) so the
+     total is exactly 100, as on the original page. */
+  function toPercents(widths) {
+    const total = widths.reduce((a, b) => a + b, 0) || 1;
+    const exact = widths.map(w => w / total * 100);
+    const base = exact.map(Math.floor);
+    let rest = 100 - base.reduce((a, b) => a + b, 0);
+    exact.map((v, i) => [v - base[i], i]).sort((a, b) => b[0] - a[0])
+      .forEach(([, i]) => { if (rest > 0) { base[i]++; rest--; } });
+    return base;
+  }
+
+  function extract(img) {
+    const warnings = [];
+    const at = reader(img);
+    const { width: W, height: H } = img;
+
+    const bands = horizontalBands(img, at, 0.30, Math.max(6, Math.round(H * 0.005)));
+    if (bands.length < 9) return { ok: false, warnings: ["unrecognised layout: " + bands.length + " coloured bands found, at least 9 expected"] };
+
+    const bars = bands.slice(-8);
+    const pitches = bars.slice(1).map((b, i) => b[0] - bars[i][0]);
+    const pitchSpread = Math.max(...pitches) - Math.min(...pitches);
+    if (pitchSpread > Math.max(4, H * 0.01))
+      warnings.push("uneven bar spacing (" + pitchSpread + "px): the screenshot may be cropped");
+
+    const perBar = bars.map(b => runsOf(img, at, b));
+    if (perBar.some(b => !b.runs.length)) return { ok: false, warnings: ["at least one bar is empty"] };
+
+    const trackL = Math.min(...perBar.map(b => b.runs[0][0]));
+    const trackR = Math.max(...perBar.map(b => b.runs[b.runs.length - 1][1]));
+    const trackW = trackR - trackL + 1;
+    const tol = Math.max(3, Math.round(trackW * 0.012));
+
+    /* Card background colour, sampled in the gap between two bars, mid-track.
+       Sampling to the left of the track landed on the axis medallion (metallic
+       grey, as dark as #676262 on a narrow screenshot): the "background"
+       reference was then so wrong that neutral columns got classified as a
+       coloured segment. */
+    const bgY = (bars[0][1] + bars[1][0]) >> 1;
+    const bgColor = at((trackL + trackR) >> 1, bgY);
+
+    const values = {}, neutrals = [], raw = [];
+    perBar.forEach((bar, i) => {
+      const { runs, y0, y1 } = bar;
+      const first = runs[0], last = runs[runs.length - 1];
+      const atL = first[0] <= trackL + tol, atR = last[1] >= trackR - tol;
+      let lw, rw;
+
+      if (runs.length >= 2 && atL && atR) {
+        const e = segmentEdges(at, y0, y1, trackL, trackR, first, last, bgColor);
+        /* The two 2px separators are taken from the neutral share and from the
+           left edge of the right segment; the left segment keeps its full
+           width. Measured across the reference screenshots: zero bias on the
+           left, −2px × scale on the right. So only the right is given back.
+           (Checked over 96 values: the setting holds across the whole plateau
+           A in [−0.5, 0] and B in [1, 2.5], so it is not a fragile fit.) */
+        const s = trackW / 590;
+        if (e) { lw = e.left; rw = e.right + 2 * s; }
+        else   { lw = (first[1] + 1) - trackL + 1; rw = trackR - (last[0] - 1) + 1; }
+      } else if (runs.length === 1 && atL && atR) {
+        /* a single full bar: 100% on one side, colour decides which */
+        const c = meanColor(at, first, y0, y1);
+        const toLeft = c ? dist2(c, AXES[i].color[0]) <= dist2(c, AXES[i].color[1]) : true;
+        lw = toLeft ? trackW : 0;
+        rw = toLeft ? 0 : trackW;
+      } else if (atL) {
+        lw = first[1] - first[0] + 1; rw = 0;
+      } else if (atR) {
+        lw = 0; rw = last[1] - last[0] + 1;
+      } else {
+        warnings.push("axis \"" + AXES[i].labels[0] + "\": segments not aligned with the track");
+        lw = first[1] - first[0] + 1; rw = last[1] - last[0] + 1;
+      }
+
+      lw = Math.min(lw, trackW); rw = Math.min(rw, trackW - lw);
+      const nw = Math.max(0, trackW - lw - rw);
+
+      /* Independent check: the derived neutral (track − left − right) must
+         land on the gap actually measured between the two segments, give or
+         take the separators. The 100% sum proves nothing, since the neutral is
+         derived from it — that sum is true by construction. */
+      if (runs.length >= 2) {
+        const measuredGap = last[0] - first[1] - 1;
+        if (Math.abs(measuredGap - nw) > Math.max(6, trackW * 0.02))
+          warnings.push("axis \"" + AXES[i].labels[0] + "\": derived neutral "
+            + Math.round(nw) + "px against " + measuredGap + "px measured");
+      }
+      raw.push({ lw, nw, rw, trackW });
+      const [lp, np, rp] = toPercents([lw, nw, rw]);
+      values[SIDE[i][0]] = lp;
+      values[SIDE[i][1]] = rp;
+      neutrals.push(np);
+    });
+
+    /* flag area: the tallest coloured band below the header strip */
+    let flag = null;
+    const cand = bands.slice(0, bands.length - 8).slice(1);
+    if (cand.length) {
+      const tallest = cand.reduce((a, b) => (b[1] - b[0] > a[1] - a[0] ? b : a));
+      let x0 = W, x1 = 0;
+      for (let y = tallest[0]; y <= tallest[1]; y++)
+        for (let x = 0; x < W; x++)
+          if (saturated(at(x, y))) { if (x < x0) x0 = x; if (x > x1) x1 = x; }
+      if (x1 > x0) flag = { x: x0, y: tallest[0], w: x1 - x0 + 1, h: tallest[1] - tallest[0] + 1 };
+    }
+    if (!flag) warnings.push("flag not found");
+
+    /* motto area: the first block of dark text below the flag */
+    let slogan = null;
+    if (flag) {
+      const top = flag.y + flag.h + 1, bottom = bars[0][0] - Math.round((bars[0][1] - bars[0][0]) * 0.6);
+      const ink = [];
+      for (let y = top; y < bottom; y++) {
+        let n = 0;
+        for (let x = 0; x < W; x++) { const p = at(x, y); if (Math.max(p[0], p[1], p[2]) < 120) n++; }
+        ink.push(n > W * 0.015);
+      }
+      let s = -1, first = null;
+      ink.forEach((on, i) => {
+        if (on && s < 0) s = i;
+        else if (!on && s >= 0) { if (!first && i - s > 3) first = [top + s, top + i - 1]; s = -1; }
+      });
+      if (!first && s >= 0) first = [top + s, bottom - 1];
+      if (first) {
+        const pad = Math.round((first[1] - first[0]) * 0.45);
+        slogan = { x: 0, y: Math.max(0, first[0] - pad), w: W,
+                   h: Math.min(H, first[1] + pad) - Math.max(0, first[0] - pad) + 1 };
+      }
+    }
+    if (!slogan) warnings.push("motto not found");
+
+    return { ok: true, warnings, values, neutrals,
+             geometry: { track: { l: trackL, r: trackR }, bars, flag, slogan, raw } };
+  }
+
+  /* ---- key concepts: a computed "values" reading of a profile ----
+     Independent of OCR, so it is available for hand-typed profiles too. The 8
+     axes are ranked by how strongly they lean, and the dominant pole of the
+     three strongest is named. */
+  /* Returns keys, never display text: which pole dominates and how strongly.
+     Turning those into words is the interface's job, so the module stays
+     language-neutral. */
+  const bandOf = v => v >= 60 ? "strong" : v >= 30 ? "marked" : v >= 12 ? "slight" : "balanced";
+
+  function keyConcepts(values, limit) {
+    const leans = SIDE.map(([a, b]) => {
+      const va = Number(values[a]), vb = Number(values[b]);
+      if (!Number.isFinite(va) && !Number.isFinite(vb)) return null;
+      const lean = (va || 0) - (vb || 0);
+      return { key: lean >= 0 ? a : b,
+               intensity: Math.abs(lean), band: bandOf(Math.abs(lean)) };
+    }).filter(Boolean);
+    leans.sort((x, y) => y.intensity - x.intensity);
+    return leans.filter(l => l.intensity >= 12).slice(0, limit || 3);
+  }
+
+  const api = { AXES, SIDE, extract, keyConcepts, toPercents, saturated };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  else global.PolitiExtract = api;
+
+})(typeof globalThis !== "undefined" ? globalThis : this);
+/* POLITI-EXTRACTOR:END */
+  </script>
+  <script>
+/* POLITI-DATA:START */
+/* Filled by tools/extract.js from politi-results/.
+   This template holds NO personal data: it is the file that is committed,
+   index.html (generated) is not. */
+window.POLITI_PROFILES = [];
+/* POLITI-DATA:END */
+  </script>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="brand">
+      <svg class="mark" width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+        <circle cx="17" cy="17" r="15.5" fill="none" stroke="var(--border)"/>
+        <line x1="17" y1="4" x2="17" y2="30" stroke="var(--axis)" stroke-width="1"/>
+        <line x1="4" y1="17" x2="30" y2="17" stroke="var(--axis)" stroke-width="1"/>
+        <circle cx="11.5" cy="22" r="3" fill="var(--series-1)"/>
+        <circle cx="22" cy="12" r="2.2" fill="var(--series-1)" opacity="0.45"/>
+      </svg>
+      <div>
+        <h1>Politiskel</h1>
+        <p class="tag" data-i18n="brandTag"></p>
+      </div>
+    </div>
+    <nav>
+      <a href="https://politiscales.fr" target="_blank" rel="noopener noreferrer">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+             stroke-width="1.6" aria-hidden="true">
+          <path d="M6.5 9.5 14 2M14 2h-4.5M14 2v4.5"/>
+          <path d="M12 9.5v3a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 2 12.5v-7A1.5 1.5 0 0 1 3.5 4h3"/>
+        </svg>
+        <span data-i18n="navTest"></span>
+      </a>
+      <a href="https://github.com/BenPali/politiskel" target="_blank" rel="noopener noreferrer">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+            0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53
+            .63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95
+            0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0
+            1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87
+            3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8
+            c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        <span data-i18n="navSource"></span>
+      </a>
+    </nav>
+  </header>
+
+  <p class="subtitle" data-i18n="subtitle"></p>
+
+  <div class="controls">
+    <label><input type="checkbox" id="t-refs" checked> <span data-i18n="optRefs"></span></label>
+    <label><input type="checkbox" id="t-reflabels" checked> <span data-i18n="optRefLabels"></span></label>
+    <label><input type="checkbox" id="t-labels" checked> <span data-i18n="optLabels"></span></label>
+    <label><input type="checkbox" id="t-centroid"> <span data-i18n="optMean"></span> <span style="color:var(--text-3)" data-i18n="optMeanWhere"></span></label>
+  </div>
+
+  <div class="layout">
+
+    <div>
+      <div class="card">
+        <h2 data-i18n="chartTitle"></h2>
+        <div class="plot">
+          <svg id="compass" viewBox="0 0 600 600" role="img"
+               aria-label="Boussole Politiskel : axe horizontal gauche-droite économique, axe vertical autoritaire (en haut) - libertaire (en bas). Cliquez un profil ou un parti pour voir toutes les distances. Les valeurs chiffrées sont dans les tableaux ci-dessous.">
+            <rect class="plot-frame" x="50" y="50" width="500" height="500" rx="4"/>
+            <g id="grid-layer"></g>
+            <line class="axis-line" x1="50" y1="300" x2="550" y2="300"/>
+            <line class="axis-line" x1="300" y1="50" x2="300" y2="550"/>
+            <g id="chrome-layer"></g>
+            <g id="annot-layer"></g>
+            <g id="refs-layer"></g>
+            <g id="points-layer"></g>
+          </svg>
+          <div class="tip" id="tip" hidden></div>
+        </div>
+        <div class="legend">
+          <span>
+            <svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="var(--series-1)"/></svg>
+            <span data-i18n="legendProfiles"></span>
+          </span>
+          <span>
+            <svg width="12" height="12" aria-hidden="true"><path d="M6 1.5 10.5 6 6 10.5 1.5 6Z" fill="none" stroke="var(--ref-ink)" stroke-width="1.5"/></svg>
+            <span data-i18n="legendParties"></span>
+          </span>
+        </div>
+
+        <p class="hint" style="margin:12px 0 0">
+          Cliquez un profil ou un parti pour comparer ; <kbd>Échap</kbd> pour désélectionner.
+        </p>
+
+        <details class="method">
+          <summary>Méthode de calcul et limites</summary>
+          <div class="body">
+            <p><strong>Axe X — économique (gauche ◄ ► droite)</strong>, moyenne pondérée de :</p>
+            <ul>
+              <li><code>0,45</code> × (Capitalisme − Communisme)</li>
+              <li><code>0,35</code> × (Laissez-faire − Régulation)</li>
+            </ul>
+            <p>
+              Écologie ↔ Productivisme n'entre pas dans l'axe X : les repères partisans
+              viennent du CHES, dont l'échelle économique exclut l'environnement (variable
+              séparée). L'y inclure revenait à comparer deux axes différents. Cette dimension
+              est affichée à part, comme le souverainisme.
+            </p>
+            <p><strong>Axe Y — sociétal (libertaire ▼ ▲ autoritaire)</strong>, moyenne pondérée de :</p>
+            <ul>
+              <li><code>0,30</code> × (Essentialisme − Constructivisme)</li>
+              <li><code>0,25</code> × (Justice punitive − réhabilitative)</li>
+              <li><code>0,25</code> × (Conservatisme − Progressisme)</li>
+              <li><code>0,20</code> × (Nationalisme − Internationalisme)</li>
+            </ul>
+            <p>
+              Convention : <strong>Y positif = autoritaire</strong>, vers le haut, comme sur
+              les boussoles politiques classiques. Plus le nombre est grand, plus le point est haut.
+            </p>
+            <p>
+              Les poids sont renormalisés sur les seules composantes renseignées : un profil
+              auquel il manque un axe PolitiScales reste comparable aux autres.
+            </p>
+            <p>
+              <strong>Repères partisans.</strong> Dix des quatorze partis sont placés d'après le
+              <em>Chapel Hill Expert Survey 2024</em> (609 politologues, 279 partis européens),
+              dont les échelles <code>lrecon</code> et <code>galtan</code> sont exactement les deux
+              dimensions de cette boussole : position = (score 0-10 − 5) × 20. Les quatre autres
+              (Lutte ouvrière, NPA, Debout la France, La France humaniste) n'y figurent pas et
+              restent des estimations à la main, calées sur l'échelle des dix premières.
+              Ce ne sont pas des scores PolitiScales : les deux échelles restent de natures
+              différentes, et les distances profil-parti gardent donc une part d'approximation.
+              <strong>Proximité.</strong> Les deux seuils ne sont pas fixés à la main : ils
+              se déduisent des repères eux-mêmes. On mesure l'espacement médian entre un parti
+              et son voisin le plus proche, puis « proche » vaut jusqu'à cet espacement et
+              « modérée » jusqu'à une fois et demie. Au-delà, le nom du parti le moins lointain
+              reste affiché, mais la page signale qu'aucun n'est vraiment proche. L'échiquier
+              français reste creux en son centre — le plus grand vide sur l'axe économique
+              sépare La France humaniste de MoDem — donc les profils centristes ont
+              mécaniquement des rattachements plus lâches que les profils marqués.
+            </p>
+            <p>
+              L'axe souverainiste (nationalisme ↔ internationalisme) est fortement transversal
+              en France : il est repris ici comme composante de l'axe Y <em>et</em> affiché
+              à part dans le tableau, car il sépare des forces que les deux axes rapprochent
+              (RN et LFI, notamment).
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <div class="card" id="detail-card">
+        <h2 id="detail-title" data-i18n="distances"></h2>
+        <div class="id-card" id="detail-id" hidden></div>
+        <p class="hint" id="detail-hint"></p>
+        <div class="table-scroll" id="detail-wrap" hidden>
+          <table id="detail-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th id="detail-col" data-i18n="colParty"></th>
+                <th class="bar-cell"></th>
+                <th style="text-align:right" data-i18n="colDistance"></th>
+                <th style="text-align:right" data-i18n-title="titleDeltaEcon" data-i18n="colDeltaEcon"></th>
+                <th style="text-align:right" data-i18n-title="titleDeltaSocial" data-i18n="colDeltaSocial"></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2 data-i18n="tableTitle"></h2>
+        <div class="table-scroll">
+          <table id="profiles-table">
+            <thead>
+              <tr>
+                <th data-i18n="colAlias"></th>
+                <th style="text-align:right" data-i18n="colX"></th>
+                <th style="text-align:right" data-i18n-title="titleY" data-i18n="colY"></th>
+                <th style="text-align:right" data-i18n-title="titleSov" data-i18n="colSov"></th>
+                <th style="text-align:right" data-i18n-title="titleEcol" data-i18n="colEcol"></th>
+                <th data-i18n="colFamily"></th>
+                <th><span class="sr-only" aria-label="Supprimer"></span></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="actions">
+          <button type="button" class="ghost" id="reset-btn" data-i18n="reset"></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="addTitle"></h2>
+
+        <label class="drop" id="drop">
+          <strong data-i18n="dropTitle"></strong>
+          <span data-i18n="dropHint"></span>
+          <input type="file" id="drop-input" accept="image/png,image/*">
+        </label>
+        <p class="drop-note">
+          Les 16 pourcentages sont lus sur la géométrie des barres, pas par OCR : un
+          segment de 5 % ne porte aucune étiquette et serait illisible autrement.
+          Le contrôle porte sur le neutre — la part déduite doit retomber sur le vide
+          réellement mesuré entre les deux segments. Pour traiter tout le dossier d'un
+          coup : <code>node tools/extract.js</code>.
+        </p>
+        <div class="capture-ok" id="capture-ok" hidden></div>
+
+        <p class="hint">
+          Saisissez les pourcentages PolitiScales (0-100). Les deux pôles d'un même axe ne
+          peuvent pas dépasser 100 % à eux deux — le reste est la part neutre.
+          Laissez à 0 un axe que vous ne connaissez pas : il sera ignoré, pas compté comme neutre.
+        </p>
+        <form id="add-form" novalidate>
+          <div class="field">
+            <label for="p-alias" data-i18n="aliasLabel"></label>
+            <input type="text" id="p-alias" maxlength="24" data-i18n-placeholder="aliasPlaceholder" required>
+          </div>
+          <fieldset id="axis-fields"></fieldset>
+          <p class="error" id="form-error" hidden></p>
+          <div class="actions">
+            <button type="submit" class="primary" data-i18n="submit"></button>
+            <button type="button" class="ghost" id="clear-btn" data-i18n="clear"></button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card" id="strips-card" style="margin-top: 20px;">
+    <div class="tip-strip" id="strip-tip" hidden></div>
+    <h2 data-i18n="stripsTitle"></h2>
+    <p class="hint" id="strips-hint"></p>
+    <div class="strip-head">
+      <span data-i18n="poleNegative"></span><span class="c">−100 &nbsp;·&nbsp; 0 &nbsp;·&nbsp; +100</span>
+      <span class="r" data-i18n="polePositive"></span><span class="r">σ</span>
+    </div>
+    <div id="axes-strips" class="strips"></div>
+  </div>
+
+  <footer class="site">
+    <div class="cols">
+      <div>
+        <h2 data-i18n="footPrivacy"></h2>
+        <p>
+          Tout reste sur votre machine. Les captures, les profils et cette page
+          assemblée ne sont envoyés nulle part — il n'y a ni serveur, ni compte,
+          ni traceur. Le dépôt de code ne contient aucun profil.
+        </p>
+      </div>
+      <div>
+        <h2 data-i18n="footSources"></h2>
+        <ul>
+          <li>
+            <a href="https://politiscales.fr" target="_blank" rel="noopener noreferrer">PolitiScales</a>
+            — le questionnaire à huit axes
+          </li>
+          <li>
+            <a href="https://www.chesdata.eu/ches-europe/" target="_blank" rel="noopener noreferrer">Chapel Hill Expert Survey 2024</a>
+            — position de dix des quinze partis
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h2 data-i18n="footCode"></h2>
+        <ul>
+          <li>
+            <a href="https://github.com/BenPali/politiskel" target="_blank" rel="noopener noreferrer">github.com/BenPali/politiskel</a>
+          </li>
+          <li>Licence MIT</li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">
+      Les repères partisans situent un ordre de grandeur, pas une mesure : dix viennent
+      d'une enquête d'experts, cinq sont des estimations attribuées à la main et signalées
+      comme telles au survol. Les pourcentages des profils, eux, sont lus directement sur
+      les captures.
+    </p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* ----------------------------------------------------------------- i18n ---
+   Every user-facing string lives here. Adding a language means adding one
+   object to LOCALES and nothing else: no copy is hardcoded anywhere below,
+   and the static markup is filled from the same table through data-i18n
+   attributes. The language is taken from <html lang>.
+
+   Two things deliberately stay out: party names, which are proper nouns, and
+   the numbers themselves. */
+const LOCALES = {
+  fr: {
+    /* poles, keyed by axis side — also used for the concept pills */
+    pole: {
+      cst: "Constructivisme", ess: "Essentialisme",
+      rehab: "Réhabilitation", pun: "Répression",
+      prg: "Progressisme", csv: "Conservatisme",
+      int: "Internationalisme", nat: "Nationalisme",
+      com: "Anticapitalisme", cap: "Capitalisme",
+      reg: "Régulation", laf: "Laissez-faire",
+      eco: "Écologie", prod: "Productivisme",
+      rev: "Révolution", ref: "Réformisme"
+    },
+    /* axis labels as the questionnaire words them */
+    axis: {
+      com: "Communisme", cap: "Capitalisme",
+      reg: "Régulation", laf: "Laissez-faire",
+      eco: "Écologie", prod: "Productivisme",
+      cst: "Constructivisme", ess: "Essentialisme",
+      rehab: "Justice réhabilitative", pun: "Justice punitive",
+      prg: "Progressisme", csv: "Conservatisme",
+      int: "Internationalisme", nat: "Nationalisme",
+      rev: "Révolution", ref: "Réformisme"
+    },
+    band: { strong: "très marqué", marked: "marqué", slight: "léger", balanced: "équilibré" },
+    fit: { near: "proche", moderate: "modérée", far: "lointaine" },
+    proximity: "proximité ",
+    noCloseParty: "aucun parti vraiment proche",
+    nearest: "Le plus proche : ",
+    nearestFar: "Aucun parti vraiment proche — le moins lointain : ",
+    method: { revolutionary: "Révolutionnaire", reformist: "Réformiste", neither: "Ni l'un ni l'autre" },
+
+    axisTop: "AUTORITAIRE — ordre et tradition",
+    axisBottom: "LIBERTAIRE — ouverture sociétale",
+    axisLeft: "GAUCHE économique",
+    axisRight: "DROITE économique",
+    quadTopLeft: "Gauche autoritaire", quadTopRight: "Droite autoritaire",
+    quadBottomLeft: "Gauche libertaire", quadBottomRight: "Droite libertaire",
+
+    tipEcon: "Axe économique", tipSocial: "Axe sociétal",
+    tipSov: "Souverainisme", tipEcol: "Écologie", tipMethod: "Méthode",
+    suffixAuthor: " autor.", suffixLibert: " libert.",
+
+    distances: "Distances",
+    distancesOf: "Distances de ",
+    profilesNear: "Profils proches de ",
+    colParty: "Parti", colProfile: "Profil",
+    nothingToCompare: "Aucun profil à comparer.",
+    groupHere: n => n + " profils à cette position — cliquez celui à suivre",
+
+    flagAlt: a => "Drapeau PolitiScales de " + a,
+    deleteProfile: a => "Supprimer " + a,
+    balancedProfile: "profil équilibré sur tous les axes",
+    noMarkedAxis: "aucun axe marqué",
+    mean: (x, y) => "Moyenne (" + x + ", " + y + ")",
+    groupMean: v => "Moyenne du groupe : " + v,
+
+    emptyDrop: "Aucun profil. Déposez une capture ci-dessous, ou saisissez-en un à la main.",
+    emptyNoData: "profiles-data.js absent — lancez « node tools/extract.js » pour lire politi-results/.",
+    detailHint: n => "Cliquez un profil (●) pour voir sa distance à chacun des " + n
+      + " partis, ou un parti (◇) pour voir quels profils s'en rapprochent le plus.",
+    stripsHint: "Chaque ligne est un axe PolitiScales, chaque point un profil. Les axes sont "
+      + "triés par dispersion (σ) : en haut ceux qui vous séparent le plus, en bas ceux sur "
+      + "lesquels vous êtes d'accord. Survolez un point pour voir le détail et sa zone "
+      + "d'incertitude — la part de réponses neutres, donc la marge où il glisserait si son "
+      + "indécision basculait. Un liseré double signale deux profils exactement superposés : "
+      + "l'infobulle les liste tous les deux. « Moyenne du groupe » ajoute un repère par axe.",
+
+    formAxisHead: "Axe — gauche du ↔ tire vers ◄ / ▼",
+    formColLeft: "◄ ▼", formColRight: "► ▲",
+    errNoAlias: "Renseignez un alias.",
+    errDuplicate: a => "Un profil porte déjà l'alias « " + a + " ».",
+    errOverHundred: l => "Les deux pôles d'un axe ne peuvent pas dépasser 100 % au total : " + l + ".",
+    errNoAxis: "Renseignez au moins un axe.",
+    errNoExtractor: "tools/politi-dissect.js n'est pas chargé.",
+    errUnreadable: "Fichier illisible.",
+    errNotImage: "Ce fichier n'est pas une image exploitable.",
+    errPixels: "Lecture des pixels refusée par le navigateur.",
+    errExtract: m => "Échec de l'extraction : " + m,
+    errUnrecognised: w => "Capture non reconnue — " + w,
+    captureOk: (a, c) => a + " — " + (c || "profil équilibré") + " · vérifiez puis validez",
+
+    noMotto: "Devise non disponible (profil saisi à la main)",
+    stripDetail: (ln, l, n, rn, r) => ln + " " + l + " % · neutre " + n + " % · " + rn + " " + r + " %",
+    stripUncertainty: (a, b) => "  (incertitude " + a + " à " + b + ")",
+    /* static markup, applied through data-i18n */
+    brandTag: "Votre squelette politique",
+    navTest: "Passer le test", navSource: "Code source",
+    subtitle: "Projection des profils PolitiScales sur deux axes — gauche-droite économique "
+      + "et libertaire-autoritaire — et comparaison avec la position des principales forces "
+      + "politiques françaises.",
+    optRefs: "Repères partis français", optRefLabels: "Étiquettes des repères",
+    optLabels: "Étiquettes des profils",
+    optMean: "Moyenne du groupe", optMeanWhere: "(carte et axes)",
+    chartTitle: "Positions calculées",
+    legendProfiles: "Profils", legendParties: "Partis français (repères)",
+    tableTitle: "Profils enregistrés", addTitle: "Ajouter un profil",
+    stripsTitle: "Les huit axes, un par un",
+    dropTitle: "Déposer une capture PolitiScales",
+    dropHint: "Ou cliquez pour choisir un fichier PNG",
+    submit: "Calculer et placer", clear: "Vider", reset: "Tout réafficher",
+    aliasLabel: "Alias", aliasPlaceholder: "Ex. Luc",
+    footPrivacy: "Vos données", footSources: "Sources", footCode: "Code",
+    colAlias: "Alias", colX: "X éco", colY: "Y sociétal", colSov: "Souv.",
+    colEcol: "Écolo.", colFamily: "Famille proche",
+    colDistance: "Distance", colDeltaEcon: "Δ éco", colDeltaSocial: "Δ soc.",
+    titleY: "Positif = autoritaire (haut) · négatif = libertaire (bas)",
+    titleSov: "Nationalisme − Internationalisme : positif = souverainiste",
+    titleEcol: "Écologie − Productivisme : positif = écologiste. Hors axes, comme le souverainisme.",
+    titleDeltaEcon: "Écart sur l'axe économique",
+    titleDeltaSocial: "Écart sur l'axe sociétal : positif = le parti est plus autoritaire que vous",
+
+    neutralPct: "Neutre", positionLabel: "Position",
+    uncertainty: "Incertitude", uncertaintyNone: "aucune",
+    poleNegative: "Pôle négatif", polePositive: "Pôle positif"
+  }
+};
+const LANG = (document.documentElement.lang || "fr").slice(0, 2);
+const L = LOCALES[LANG] || LOCALES.fr;
+
+/* ---------------------------------------------------------------- model --- */
+
+/* The 8 PolitiScales axes. `neg` pulls left (X) or down (Y), `pos` pulls
+   right or up. `axis: null` means descriptive only. */
+const AXES = [
+  { neg: ["com"], pos: ["cap"],  axis: "x", w: 0.45 },
+  { neg: ["reg"], pos: ["laf"],  axis: "x", w: 0.35 },
+  /* Ecology <-> Productivism does NOT feed axis X. It used to, at 20%, which
+     mixed two different things: the party references come from CHES, whose
+     `lrecon` scale (taxes, spending, deregulation) excludes the environment —
+     CHES keeps it as a separate variable. So we were comparing an
+     economy+ecology axis against a purely economic one. The worst-affected
+     profile came out 12 points too far left: ecological AND pro-market, their
+     ecology dragged them leftwards even though it says nothing about their
+     relationship to the market. Ecology is now a separate readout, like
+     sovereignism. */
+  { neg: ["eco"], pos: ["prod"], axis: null },
+  { neg: ["cst"], pos: ["ess"],  axis: "y", w: 0.30 },
+  { neg: ["rehab"], pos: ["pun"], axis: "y", w: 0.25 },
+  { neg: ["prg"], pos: ["csv"],  axis: "y", w: 0.25 },
+  { neg: ["int"], pos: ["nat"],  axis: "y", w: 0.20 },
+  { neg: ["rev"], pos: ["ref"],  axis: null }
+];
+/* Axis wording comes from the locale, so AXES itself stays language-neutral. */
+AXES.forEach(a => { a.neg[1] = L.axis[a.neg[0]]; a.pos[1] = L.axis[a.pos[0]]; });
+
+/* Reference parties, on the same [-100, 100] scales as the profiles. */
+const REFERENCES = [
+  /* Positions from the Chapel Hill Expert Survey 2024 (609 political
+     scientists, 279 European parties), converted from its 0-10 `lrecon`
+     (economic left-right) and `galtan` scales: value = (score − 5) × 20.
+     Those are exactly the two dimensions of this compass.
+     The four entries marked "estimate" are absent from CHES — too small, or
+     created after the survey — and remain hand estimates, calibrated against
+     the scale of the other ten. */
+  { name: "Lutte ouvrière",     x: -92, y: -30, note: "Trotskisme, anticapitalisme de classe — estimation (hors CHES)" },
+  { name: "NPA / Rév. perm.",   x: -88, y: -70, note: "Anticapitalisme, forte ouverture sociétale — estimation (hors CHES)" },
+  { name: "La France insoumise",x: -82, y: -64, note: "Rupture écosocialiste, populisme de gauche — CHES 2024" },
+  { name: "PCF",                x: -75, y: -29, note: "Étatisme économique, sensibilité souverainiste — CHES 2024" },
+  { name: "Les Écologistes",    x: -54, y: -66, note: "Écologie politique, libéralisme culturel — CHES 2024" },
+  { name: "Parti socialiste",   x: -33, y: -45, note: "Social-démocratie réformiste — CHES 2024" },
+  { name: "La France humaniste", x: -15, y: -22, note: "Villepin, 2025 — gaullisme social : patrimoine et successions taxés, mais déficit sous 3 %, simplification par ordonnances. Estimation (postérieur au CHES), placement incertain" },
+  { name: "MoDem",              x:  14, y: -10, note: "Centrisme social, europhilie — CHES 2024" },
+  { name: "Renaissance",        x:  24, y: -18, note: "Libéralisme économique, centre-droit — CHES 2024" },
+  { name: "Horizons",           x:  36, y:   6, note: "Droite libérale gestionnaire — CHES 2024" },
+  { name: "Debout la France",   x:  38, y:  62, note: "Souverainisme gaulliste — estimation (hors CHES)" },
+  { name: "Rassemblement national", x: 20, y: 67, note: "Étatisme social ciblé, nationalisme — CHES 2024" },
+  { name: "Les Républicains",   x:  56, y:  44, note: "Droite conservatrice, ordre et marché — CHES 2024" },
+  { name: "Nouvelle Énergie",   x:  62, y:  32, note: "Lisnard — droite libérale et décentralisatrice : choc de dérégulation, retraite par capitalisation, migration hors contrôle des cours européennes. Estimation (hors CHES)" },
+  { name: "Reconquête",         x:  67, y:  82, note: "Libéralisme économique, national-conservatisme — CHES 2024" }
+];
+
+/* Starting profiles: the ones extracted from politi-results/ by
+   tools/extract.js. They carry all 8 PolitiScales axes, where the original
+   hand-typed data only covered 6. If profiles-data.js is missing the page
+   starts empty rather than on copied values that would drift from the
+   source. */
+function fromCapture(p) {
+  return Object.assign({ alias: p.alias, flag: p.flag || null,
+                         slogan: p.slogan || null, source: p.source || null },
+                       p.values);
+}
+const SEED = (window.POLITI_PROFILES || []).map(fromCapture);
+
+
+/* v4: the browser no longer stores the full profile list, only what the user
+   did on top of it — which profiles they hid and which they typed in. The
+   profiles extracted from politi-results/ stay the source of truth and are
+   re-read on every load.
+
+   Before, a single deletion froze the list in localStorage: a newly extracted
+   screenshot would never appear again, shadowed by the stale local copy. */
+const STORE_KEY = "politicompass.overlay.v4";
+
+/* Stable id for an extracted profile: its source file. Hand-typed profiles
+   have none, so we fall back to the alias. */
+const idOf = p => p.source || ("alias:" + p.alias);
+
+function loadOverlay() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return { hidden: [], added: [] };
+    const o = JSON.parse(raw);
+    return {
+      hidden: Array.isArray(o && o.hidden) ? o.hidden.filter(x => typeof x === "string") : [],
+      added: Array.isArray(o && o.added)
+        ? o.added.filter(x => x && typeof x.alias === "string") : []
+    };
+  } catch (_) {
+    return { hidden: [], added: [] };
+  }
+}
+function saveOverlay() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(overlay)); } catch (_) { /* quota exceeded, or private browsing */ }
+}
+
+let overlay = loadOverlay();
+
+function rebuild() {
+  const hidden = new Set(overlay.hidden);
+  profiles = SEED.filter(p => !hidden.has(idOf(p))).map(p => ({ ...p }))
+    .concat(overlay.added.map(p => ({ ...p })));
+}
+
+let profiles = [];
+rebuild();
+
+/* A component only counts if at least one of its two poles is filled in.
+   Weights are renormalised over the components present, so an incomplete
+   profile stays on the same [-100, 100] scale as the others. */
+function axisScore(p, which) {
+  let sum = 0, weight = 0;
+  for (const a of AXES) {
+    if (a.axis !== which) continue;
+    const lo = p[a.neg[0]], hi = p[a.pos[0]];
+    const hasLo = Number.isFinite(lo), hasHi = Number.isFinite(hi);
+    if (!hasLo && !hasHi) continue;
+    sum += a.w * ((hasHi ? hi : 0) - (hasLo ? lo : 0));
+    weight += a.w;
+  }
+  if (!weight) return 0;
+  return clamp(sum / weight, -100, 100);
+}
+
+function coords(p) {
+  return {
+    x: Math.round(axisScore(p, "x")),
+    y: Math.round(axisScore(p, "y")),
+    sov: Math.round((Number(p.nat) || 0) - (Number(p.int) || 0)),
+    ecol: Math.round((Number(p.eco) || 0) - (Number(p.prod) || 0)),
+    method: methodTag(p)
+  };
+}
+
+function methodTag(p) {
+  const rev = Number(p.rev), ref = Number(p.ref);
+  if (!Number.isFinite(rev) && !Number.isFinite(ref)) return null;
+  const d = (rev || 0) - (ref || 0);
+  if (d > 20) return L.method.revolutionary;
+  if (d < -20) return L.method.reformist;
+  return L.method.neither;
+}
+
+/* Nearest neighbour, replacing a cascade of thresholds that left gaps (the
+   whole right-libertarian quadrant, and x = 0) and had unreachable branches
+   (the RN was always caught by "x > 0 && y < 0" before being tested). */
+function nearestFamily(x, y) {
+  const ranked = REFERENCES
+    .map(r => ({ r, d: Math.hypot(r.x - x, r.y - y) }))
+    .sort((a, b) => a.d - b.d);
+  const best = ranked[0];
+  const fit = fitOf(best.d);
+  return { name: best.r.name, note: best.r.note, d: Math.round(best.d), fit, second: ranked[1] };
+}
+
+/* { kind: "profile" | "party", i } — whatever is currently being compared. */
+let selection = null;
+
+/* Proximity thresholds, DERIVED from the references rather than hardcoded:
+   we measure the median spacing between a party and its nearest neighbour and
+   work from that. "Close" means no further from the party than that party is
+   from its own neighbour; beyond one and a half times, no party is genuinely
+   close (the name is still shown, but presenting it as a family would be a
+   stretch).
+
+   Deriving them keeps them from going stale: pinned at 20 and 32 against the
+   old positions, they were wrong the moment the CHES data was adopted, which
+   tightens the set. */
+const SPACING = (() => {
+  const nn = REFERENCES.map((r, i) => Math.min(...REFERENCES
+    .filter((_, j) => j !== i).map(o => Math.hypot(o.x - r.x, o.y - r.y))));
+  nn.sort((a, b) => a - b);
+  return nn[nn.length >> 1];
+})();
+const NEAR_LIMIT = Math.round(SPACING);
+const FAR_LIMIT = Math.round(SPACING * 1.5);
+const fitOf = d => (d <= NEAR_LIMIT ? L.fit.near : d <= FAR_LIMIT ? L.fit.moderate : L.fit.far);
+const fitPhrase = d => (d <= FAR_LIMIT ? L.proximity + fitOf(d) : L.noCloseParty);
+
+/* Distances from a point to every party, nearest first. dx/dy are signed:
+   "this party sits 34 points to your right". */
+function rankParties(c) {
+  return REFERENCES
+    .map(r => ({ name: r.name, note: r.note,
+                 d: Math.round(Math.hypot(r.x - c.x, r.y - c.y)),
+                 dx: r.x - c.x, dy: r.y - c.y }))
+    .sort((a, b) => a.d - b.d);
+}
+
+/* The mirror image: which profiles come closest to a given party. */
+function rankProfiles(r, computed) {
+  return computed
+    .map(({ p, c }, i) => ({ name: p.alias, note: null, i,
+                             d: Math.round(Math.hypot(c.x - r.x, c.y - r.y)),
+                             dx: c.x - r.x, dy: c.y - r.y }))
+    .sort((a, b) => a.d - b.d);
+}
+
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+const toSvgX = x => clamp(300 + x * 2.5, 58, 542);
+const toSvgY = y => clamp(300 - y * 2.5, 58, 542);
+const signed  = n => (n > 0 ? "+" : "") + n;
+
+/* Flag thumbnail, or a plain series dot when the profile has none (typed in
+   by hand). */
+function flagEl(p, cls) {
+  /* The flag comes from profiles-data.js or from a local canvas; we still only
+     accept an image data URI, so a profile tampered with in localStorage
+     cannot slip another URL into a src. */
+  if (p.flag && /^data:image\/(png|jpeg|webp);base64,/.test(p.flag)) {
+    const img = document.createElement("img");
+    img.className = "flag " + (cls || "");
+    img.src = p.flag;
+    img.alt = L.flagAlt(p.alias);
+    return img;
+  }
+  const sw = document.createElement("span");
+  sw.className = "swatch";
+  return sw;
+}
+
+/* Key concepts: the three most pronounced axes, named by their dominant
+   pole. Computed from the scores, so available for hand-typed profiles too —
+   unlike the motto, which is read off the screenshot. */
+function conceptsEl(p) {
+  const ul = document.createElement("ul");
+  ul.className = "concepts";
+  const list = window.PolitiExtract ? PolitiExtract.keyConcepts(p, 3) : [];
+  if (!list.length) {
+    const li = document.createElement("li");
+    li.textContent = L.balancedProfile;
+    ul.appendChild(li);
+    return ul;
+  }
+  for (const c of list) {
+    const li = document.createElement("li");
+    const b = document.createElement("b"); b.textContent = L.pole[c.key];
+    const i = document.createElement("i");
+    i.textContent = " " + c.intensity + " · " + L.band[c.band];
+    li.append(b, i);
+    ul.appendChild(li);
+  }
+  return ul;
+}
+
+/* ------------------------------------------------------------- labels --- */
+
+const overlaps = (a, b) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+
+const CANDIDATES = [
+  { dx:  11, dy:   3.5, anchor: "start"  },
+  { dx: -11, dy:   3.5, anchor: "end"    },
+  { dx:   0, dy: -12,   anchor: "middle" },
+  { dx:   0, dy:  17,   anchor: "middle" },
+  { dx:  11, dy: -8,    anchor: "start"  },
+  { dx: -11, dy: -8,    anchor: "end"    },
+  { dx:  11, dy:  15,   anchor: "start"  },
+  { dx: -11, dy:  15,   anchor: "end"    },
+  /* wider ring: in dense areas (bottom-left), all eight tight positions are
+     taken and the label has to move further out */
+  { dx:   0, dy: -23,   anchor: "middle" },
+  { dx:   0, dy:  28,   anchor: "middle" },
+  { dx:  22, dy: -18,   anchor: "start"  },
+  { dx: -22, dy: -18,   anchor: "end"    },
+  { dx:  22, dy:  24,   anchor: "start"  },
+  { dx: -22, dy:  24,   anchor: "end"    },
+  { dx:  18, dy: -30,   anchor: "start"  },
+  { dx: -18, dy: -30,   anchor: "end"    }
+];
+
+/* Places each label at the first free spot around its point. `taken`
+   accumulates the boxes already occupied (markers first, then labels). */
+function placeLabel(item, taken) {
+  const w = item.w + 3;          /* actually measured width, plus a little air */
+  const h = item.size;
+  for (const c of CANDIDATES) {
+    let x0 = item.x + c.dx;
+    if (c.anchor === "end") x0 -= w;
+    else if (c.anchor === "middle") x0 -= w / 2;
+    const box = { x0, x1: x0 + w, y0: item.y + c.dy - h * 0.8, y1: item.y + c.dy + h * 0.3 };
+    if (box.x0 < 52 || box.x1 > 548 || box.y0 < 52 || box.y1 > 548) continue;
+    if (taken.some(t => overlaps(t, box))) continue;
+    taken.push(box);
+    return c;
+  }
+  return null;            /* no free spot: the caller decides what to do */
+}
+
+/* ------------------------------------------------------------------ rendu --- */
+
+/* Real text width, measured by the engine. Estimating it from the character
+   count was off by 33% on short capitalised strings ("MoDem"), and the error
+   varied between engines: Firefox then overlapped two labels that Chrome kept
+   apart. `visibility:hidden` keeps the element in layout, hence measurable —
+   `display:none` would return 0. */
+function measureWidths(strings, cls) {
+  if (!strings.length) return [];
+  const holder = el("g", { visibility: "hidden" });
+  $("compass").appendChild(holder);
+  const nodes = strings.map(str => {
+    const t = el("text", { class: cls });
+    t.textContent = str;
+    holder.appendChild(t);
+    return t;
+  });
+  const widths = nodes.map(t => {
+    try { return t.getComputedTextLength(); }
+    catch (_) { return t.textContent.length * 6; }
+  });
+  holder.remove();
+  return widths;
+}
+
+const NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs) => {
+  const n = document.createElementNS(NS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  return n;
+};
+const $ = id => document.getElementById(id);
+
+function renderChrome() {
+  const grid = $("grid-layer");
+  const chrome = $("chrome-layer");
+  grid.replaceChildren();
+  chrome.replaceChildren();
+
+  for (let v = -100; v <= 100; v += 25) {
+    if (v === 0) continue;
+    grid.appendChild(el("line", { class: "grid-line", x1: toSvgX(v), y1: 50, x2: toSvgX(v), y2: 550 }));
+    grid.appendChild(el("line", { class: "grid-line", x1: 50, y1: toSvgY(v), x2: 550, y2: toSvgY(v) }));
+  }
+
+  const caps = [
+    { t: L.axisTop,    x: 300, y: 38,  anchor: "middle", cls: "axis-cap" },
+    { t: L.axisBottom, x: 300, y: 574, anchor: "middle", cls: "axis-cap" },
+    { t: L.quadTopLeft,     x:  60, y:  68, anchor: "start", cls: "quad-cap" },
+    { t: L.quadTopRight,    x: 540, y:  68, anchor: "end",   cls: "quad-cap" },
+    { t: L.quadBottomLeft,  x:  60, y: 538, anchor: "start", cls: "quad-cap" },
+    { t: L.quadBottomRight, x: 540, y: 538, anchor: "end",   cls: "quad-cap" },
+    { t: "−100", x: 52,  y: 315, anchor: "start",  cls: "tick-cap" },
+    { t: "−50",  x: 175, y: 315, anchor: "middle", cls: "tick-cap" },
+    { t: "+50",  x: 425, y: 315, anchor: "middle", cls: "tick-cap" },
+    { t: "+100", x: 548, y: 315, anchor: "end",    cls: "tick-cap" }
+  ];
+  for (const c of caps) {
+    const t = el("text", { class: c.cls, x: c.x, y: c.y, "text-anchor": c.anchor });
+    t.textContent = c.t;
+    chrome.appendChild(t);
+  }
+
+  const side = [
+    { t: L.axisLeft,  x: 22,  y: 300, rot: -90 },
+    { t: L.axisRight, x: 578, y: 300, rot: 90 }
+  ];
+  for (const s of side) {
+    const t = el("text", { class: "axis-cap", x: s.x, y: s.y, "text-anchor": "middle",
+                           transform: "rotate(" + s.rot + " " + s.x + " " + s.y + ")" });
+    t.textContent = s.t;
+    chrome.appendChild(t);
+  }
+
+  /* Axis arrowheads are drawn, not written. The side labels are rotated by
+     ±90°, which rotates a glyph's meaning too: "◄" ended up pointing down, and
+     so did "►". A shape drawn at each axis end cannot point the wrong way. */
+  const heads = [
+    "M 52 300 L 62 295 L 62 305 Z",      /* gauche */
+    "M 548 300 L 538 295 L 538 305 Z",   /* droite */
+    "M 300 52 L 295 62 L 305 62 Z",      /* haut : autoritaire */
+    "M 300 548 L 295 538 L 305 538 Z"    /* bas : libertaire */
+  ];
+  for (const d of heads) chrome.appendChild(el("path", { class: "axis-head", d }));
+}
+
+function render() {
+  const refsLayer = $("refs-layer");
+  const ptsLayer  = $("points-layer");
+  const annot     = $("annot-layer");
+  const tbody     = document.querySelector("#profiles-table tbody");
+  refsLayer.replaceChildren();
+  ptsLayer.replaceChildren();
+  annot.replaceChildren();
+  tbody.replaceChildren();
+
+  /* a deletion may have invalidated the current selection */
+  if (selection && selection.kind === "profile" && selection.i >= profiles.length) selection = null;
+  if (selection && selection.kind === "party" && !$("t-refs").checked) selection = null;
+
+  const showRefs      = $("t-refs").checked;
+  const showRefLabels = $("t-reflabels").checked;
+  const showLabels    = $("t-labels").checked;
+
+  const computed = profiles.map(p => ({ p, c: coords(p) }));
+
+  /* Background text (ticks, quadrant corners) occupies space just like a
+     marker: without this a label would be laid on top of it. */
+  const taken = [
+    { x0:  46, x1:  90, y0: 306, y1: 318 }, { x0: 160, x1: 190, y0: 306, y1: 318 },
+    { x0: 410, x1: 440, y0: 306, y1: 318 }, { x0: 510, x1: 554, y0: 306, y1: 318 },
+    { x0:  56, x1: 150, y0:  58, y1:  72 }, { x0: 452, x1: 544, y0:  58, y1:  72 },
+    { x0:  56, x1: 156, y0: 528, y1: 542 }, { x0: 446, x1: 544, y0: 528, y1: 542 },
+    /* the four axis arrowheads */
+    { x0:  50, x1:  64, y0: 293, y1: 307 }, { x0: 536, x1: 550, y0: 293, y1: 307 },
+    { x0: 293, x1: 307, y0:  50, y1:  64 }, { x0: 293, x1: 307, y0: 536, y1: 550 }
+  ];
+
+  /* The group mean is drawn later but reserves its space here, otherwise a
+     party label lands on top of it. */
+  if ($("t-centroid").checked && computed.length >= 2) {
+    const cx = toSvgX(computed.reduce((a, r) => a + r.c.x, 0) / computed.length);
+    const cy = toSvgY(computed.reduce((a, r) => a + r.c.y, 0) / computed.length);
+    taken.push({ x0: cx - 13, x1: cx + 125, y0: cy - 13, y1: cy + 13 });
+  }
+
+  /* Every marker claims space first, profiles before parties: party labels
+     give way to profile labels, not the other way round. */
+  for (const { c } of computed) {
+    const x = toSvgX(c.x), y = toSvgY(c.y);
+    taken.push({ x0: x - 10, x1: x + 10, y0: y - 10, y1: y + 10 });
+  }
+  if (showRefs) {
+    for (const r of REFERENCES) {
+      const x = toSvgX(r.x), y = toSvgY(r.y);
+      taken.push({ x0: x - 7, x1: x + 7, y0: y - 7, y1: y + 7 });
+    }
+  }
+
+  const ptTexts = computed.map(({ p }) => p.alias.slice(0, 16));
+  const ptW = showLabels ? measureWidths(ptTexts, "pt-label") : [];
+  const ptPlacements = computed.map(({ c }, i) => {
+    const x = toSvgX(c.x), y = toSvgY(c.y);
+    if (!showLabels) return null;
+    /* A profile always keeps its label: it is the subject of the chart. */
+    return placeLabel({ x, y, text: ptTexts[i], w: ptW[i], size: 10.5 }, taken)
+        || CANDIDATES[0];
+  });
+
+  const refW = (showRefs && showRefLabels)
+    ? measureWidths(REFERENCES.map(r => r.name), "ref-label") : [];
+  if (showRefs) {
+    REFERENCES.forEach((r, ri) => {
+      const x = toSvgX(r.x), y = toSvgY(r.y);
+      const g = el("g", {});
+      g.dataset.party = String(ri);
+      if (selection && selection.kind === "party" && selection.i === ri) g.classList.add("sel");
+      const hit = el("circle", { class: "ref-hit", cx: x, cy: y, r: 13, tabindex: "0",
+                                 role: "button", "aria-label": "Parti " + r.name });
+      g.appendChild(hit);
+      g.appendChild(el("path", {
+        class: "ref-mark",
+        d: "M " + x + " " + (y - 5.5) + " L " + (x + 5.5) + " " + y +
+           " L " + x + " " + (y + 5.5) + " L " + (x - 5.5) + " " + y + " Z"
+      }));
+      const title = el("title", {});
+      title.textContent = r.name + " — " + r.note;
+      g.appendChild(title);
+
+      if (showRefLabels) {
+        /* If a reference finds no free spot we drop its label rather than lay it
+           over a profile's: the name stays available by hovering the diamond. */
+        const c = placeLabel({ x, y, text: r.name, w: refW[ri], size: 9.5 }, taken);
+        if (c) {
+          const t = el("text", { class: "ref-label", x: x + c.dx, y: y + c.dy, "text-anchor": c.anchor });
+          t.textContent = r.name;
+          g.appendChild(t);
+        }
+      }
+      const pick = () => select("party", ri);
+      g.addEventListener("click", e => { e.stopPropagation(); pick(); });
+      hit.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); }
+      });
+      refsLayer.appendChild(g);
+    });
+  }
+
+  computed.forEach(({ p, c }, i) => {
+    const x = toSvgX(c.x), y = toSvgY(c.y);
+    const g = el("g", {});
+    g.dataset.idx = String(i);
+    if (selection && selection.kind === "profile" && selection.i === i) g.classList.add("sel");
+
+    const hit = el("circle", { class: "hit", cx: x, cy: y, r: 14, tabindex: "0",
+                               role: "button", "aria-label": p.alias });
+    g.appendChild(hit);
+    const pick = () => select("profile", i);
+    g.addEventListener("click", e => { e.stopPropagation(); pick(); });
+    hit.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); }
+    });
+    g.appendChild(el("circle", { class: "pt-ring", cx: x, cy: y, r: 7 }));
+    g.appendChild(el("circle", { class: "pt-dot",  cx: x, cy: y, r: 7 }));
+
+    const place = ptPlacements[i];
+    if (place) {
+      const t = el("text", { class: "pt-label", x: x + place.dx, y: y + place.dy,
+                             "text-anchor": place.anchor });
+      t.textContent = p.alias.slice(0, 16);
+      g.appendChild(t);
+    }
+    ptsLayer.appendChild(g);
+
+    /* textContent throughout: the alias is free input, never HTML. */
+    const fam = nearestFamily(c.x, c.y);
+    const tr = document.createElement("tr");
+    tr.dataset.idx = String(i);
+    if (selection && selection.kind === "profile" && selection.i === i) tr.classList.add("sel");
+    tr.addEventListener("click", e => {
+      if (!e.target.closest("button")) select("profile", i);
+    });
+
+    const tdAlias = document.createElement("td");
+    tdAlias.className = "who-cell";
+    const line1 = document.createElement("div");
+    line1.append(flagEl(p, ""), document.createTextNode(p.alias));
+    tdAlias.appendChild(line1);
+    if (p.slogan) {
+      const dv = document.createElement("div");
+      dv.className = "devise";
+      dv.textContent = p.slogan.join(" · ");
+      tdAlias.appendChild(dv);
+    }
+    tr.appendChild(tdAlias);
+
+    for (const v of [c.x, c.y, c.sov, c.ecol]) {
+      const td = document.createElement("td");
+      td.className = "num";
+      td.textContent = signed(v);
+      tr.appendChild(td);
+    }
+
+    const tdFam = document.createElement("td");
+    tdFam.className = "fam";
+    const tag = document.createElement("span");
+    tag.className = "tag";
+    tag.textContent = " · " + fitPhrase(fam.d) + " (" + fam.d + ")";
+    if (fam.d > FAR_LIMIT) tag.classList.add("far-note");
+    tdFam.append(document.createTextNode(fam.name), tag);
+    tr.appendChild(tdFam);
+
+    const tdDel = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "del";
+    btn.textContent = "×";
+    btn.title = L.deleteProfile(p.alias);
+    btn.setAttribute("aria-label", L.deleteProfile(p.alias));
+    btn.addEventListener("click", e => {
+      e.stopPropagation();
+      if (selection && selection.kind === "profile") {
+        if (selection.i === i) selection = null;
+        else if (selection.i > i) selection.i -= 1;
+      }
+      /* Decide by where the profile actually lives, not by whether it has a
+         source file. A screenshot imported through the page has a source AND
+         sits in overlay.added: keying on the source alone marked it hidden,
+         which does nothing to a profile absent from SEED, so it could never
+         be deleted. */
+      const id = idOf(p);
+      if (overlay.added.some(q => idOf(q) === id)) {
+        overlay.added = overlay.added.filter(q => idOf(q) !== id);
+      } else if (!overlay.hidden.includes(id)) {
+        overlay.hidden.push(id);   /* extracted: hide it, the file stays the reference */
+      }
+      saveOverlay();
+      rebuild();
+      render();
+    });
+    tdDel.appendChild(btn);
+    tr.appendChild(tdDel);
+
+    tbody.appendChild(tr);
+  });
+
+  if (!computed.length) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 7;
+    td.className = "empty";
+    td.textContent = window.POLITI_PROFILES ? L.emptyDrop : L.emptyNoData;
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+  }
+
+  renderStrips(computed);
+  renderCentroid(computed, annot);
+  renderAnnotations(computed, annot);
+  renderDetail(computed);
+  ptsLayer.classList.toggle("dim", !!selection);
+  refsLayer.classList.toggle("dim", !!selection);
+
+  wireHover(computed);
+}
+
+function select(kind, i) {
+  $("tip").hidden = true;
+  selection = (selection && selection.kind === kind && selection.i === i)
+    ? null                       /* clicking the same target again clears the selection */
+    : { kind, i };
+  render();
+}
+
+/* One strip per PolitiScales axis, every profile laid on it, sorted by
+   decreasing spread. The compass projects eight dimensions onto two; here
+   nothing is projected. It earns its place mostly because this kind of group
+   is highly collinear: the map shows it as a line, these strips show on WHICH
+   axes it actually splits and on which everyone agrees. */
+function renderStrips(computed) {
+  const host = $("axes-strips");
+  if (!host) return;
+  host.replaceChildren();
+
+  /* For each profile and each axis: the position (lean) AND the neutral share.
+     The latter is not noise — it is the fraction of answers left undecided,
+     hence the margin the position could slide within if that indecision tipped
+     one way. We draw it as a band around the point: the only view in the page
+     where this information survives. */
+  const rows = AXES.map(a => {
+    const vals = computed.map(({ p }) => {
+      const lo = p[a.neg[0]], hi = p[a.pos[0]];
+      if (!Number.isFinite(lo) && !Number.isFinite(hi)) return null;
+      const L = Number(lo) || 0, R = Number(hi) || 0;
+      return { lean: R - L, neutral: Math.max(0, 100 - L - R), L, R };
+    });
+    const ok = vals.filter(v => v !== null).map(v => v.lean);
+    const m = ok.length ? ok.reduce((s, v) => s + v, 0) / ok.length : 0;
+    const sd = ok.length ? Math.sqrt(ok.reduce((s, v) => s + (v - m) ** 2, 0) / ok.length) : 0;
+    return { a, vals, sd };
+  }).sort((u, v) => v.sd - u.sd);
+
+  const pct = v => ((v + 100) / 200) * 100;
+
+  for (const r of rows) {
+    const row = document.createElement("div");
+    row.className = "strip";
+
+    const l = document.createElement("span");
+    l.className = "pole";
+    l.textContent = r.a.neg[1];
+    const rt = document.createElement("span");
+    rt.className = "pole r";
+    rt.textContent = r.a.pos[1];
+
+    const track = document.createElement("div");
+    track.className = "track";
+    const zero = document.createElement("div");
+    zero.className = "zero";
+    track.appendChild(zero);
+
+    if ($("t-centroid") && $("t-centroid").checked) {
+      const ok2 = r.vals.filter(v => v !== null);
+      if (ok2.length) {
+        const mean = ok2.reduce((s, v) => s + v.lean, 0) / ok2.length;
+        const mk = document.createElement("div");
+        mk.className = "mean";
+        mk.style.left = pct(mean) + "%";
+        mk.title = L.groupMean(signed(Math.round(mean)));
+        track.appendChild(mk);
+      }
+    }
+
+    r.vals.forEach((v, i) => {
+      if (v === null) return;
+      if (v.neutral > 0) {
+        const band = document.createElement("div");
+        band.className = "band";
+        band.dataset.idx = String(i);
+        const a = clamp(v.lean - v.neutral, -100, 100);
+        const b = clamp(v.lean + v.neutral, -100, 100);
+        band.style.left = pct(a) + "%";
+        band.style.width = (pct(b) - pct(a)) + "%";
+        track.appendChild(band);
+      }
+      const dot = document.createElement("div");
+      dot.className = "pt";
+      dot.style.left = pct(v.lean) + "%";
+      dot.dataset.idx = String(i);
+      dot.dataset.lean = String(v.lean);
+      dot.addEventListener("click", e => { e.stopPropagation(); select("profile", i); });
+      dot.addEventListener("pointerenter", e => openStripTip(dot, r, computed, e));
+      dot.setAttribute("aria-label", computed[i].p.alias + " : " + signed(v.lean));
+      dot.addEventListener("pointerleave", scheduleHideStripTip);
+      track.appendChild(dot);
+    });
+
+    const sd = document.createElement("span");
+    sd.className = "sd";
+    sd.textContent = Math.round(r.sd);
+
+    row.append(l, track, rt, sd);
+    host.appendChild(row);
+  }
+
+  /* Grouping of overlapping points, rather than stacking them. Two profiles
+     can land on exactly the same lean: the last one drawn hid the other, which
+     became unreachable. On a set of ten profiles a few exact collisions and a
+     handful of near ones are routine. Rather than offsetting vertically —
+     legible but ugly — we keep the alignment and let hovering open the whole
+     group as a clickable list. The threshold comes from the track's real
+     measured width, not from a guess. */
+  host.querySelectorAll(".track").forEach(track => {
+    const w = track.offsetWidth || 700;
+    const minGap = 13 * 200 / w;          /* 11 px de point + 2 px de marge */
+    const items = [...track.querySelectorAll(".pt")]
+      .map(d => ({ d, lean: Number(d.dataset.lean) }))
+      .sort((a, b) => a.lean - b.lean);
+    let cid = 0, prev = null;
+    for (const e of items) {
+      if (prev === null || e.lean - prev >= minGap) cid++;
+      e.d.dataset.cluster = String(cid);
+      prev = e.lean;
+    }
+    /* The extra ring only flags an EXACT overlap — two profiles on the same
+       lean, hence strictly invisible one under the other. Merely neighbouring
+       points stay distinct to the eye and need no marking; they still share
+       the tooltip, which keeps every one of them reachable. */
+    const exact = {};
+    items.forEach(e => { exact[e.lean] = (exact[e.lean] || 0) + 1; });
+    items.forEach(e => { if (exact[e.lean] > 1) e.d.classList.add("multi"); });
+  });
+
+  host.classList.toggle("dim", !!(selection && selection.kind === "profile"));
+  if (selection && selection.kind === "profile")
+    host.querySelectorAll('[data-idx="' + selection.i + '"]').forEach(n => n.classList.add("on"));
+
+  const hint = $("strips-hint");
+  if (hint) hint.textContent = L.stripsHint;
+}
+
+/* Hovering a point opens the WHOLE group sitting at that position, one
+   clickable row per profile. Two exactly superposed points therefore both stay
+   reachable, without shifting anything on screen. */
+let stripTipTimer = null;
+
+function openStripTip(dot, row, computed, ev) {
+  const tip = $("strip-tip"), card = $("strips-card"), host = $("axes-strips");
+  if (!tip || !card) return;
+  clearTimeout(stripTipTimer);
+
+  const track = dot.parentElement;
+  const members = [...track.querySelectorAll('.pt[data-cluster="' + dot.dataset.cluster + '"]')]
+    .map(d => ({ i: Number(d.dataset.idx), v: row.vals[Number(d.dataset.idx)] }))
+    .sort((a, b) => b.v.lean - a.v.lean);
+
+  tip.replaceChildren();
+  const ax = document.createElement("div");
+  ax.className = "ax";
+  ax.textContent = row.a.neg[1] + " ↔ " + row.a.pos[1];
+  tip.appendChild(ax);
+
+  if (members.length > 1) {
+    const more = document.createElement("p");
+    more.className = "more";
+    more.textContent = L.groupHere(members.length);
+    tip.appendChild(more);
+  }
+
+  for (const m of members) {
+    const p = computed[m.i].p, v = m.v;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "row";
+
+    const top = document.createElement("div");
+    top.className = "top";
+    const who = document.createElement("span");
+    who.className = "who";
+    who.textContent = p.alias;
+    const val = document.createElement("span");
+    val.className = "val";
+    val.textContent = signed(v.lean);
+    top.append(who, val);
+
+    const seg = document.createElement("div");
+    seg.className = "seg";
+    [["l", v.L], ["n", v.neutral], ["r", v.R]].forEach(([cls, q]) => {
+      if (q <= 0) return;
+      const i = document.createElement("i");
+      i.className = cls;
+      i.style.width = q + "%";
+      seg.appendChild(i);
+    });
+
+    const det = document.createElement("div");
+    det.className = "det";
+    det.textContent = L.stripDetail(row.a.neg[1], v.L, v.neutral, row.a.pos[1], v.R)
+      + (v.neutral ? L.stripUncertainty(signed(-v.neutral), signed(v.neutral)) : "");
+
+    btn.append(top, seg, det);
+    btn.addEventListener("click", e => { e.stopPropagation(); hideStripTip(); select("profile", m.i); });
+    btn.addEventListener("pointerenter", () => {
+      host.querySelectorAll(".band.hi").forEach(n => n.classList.remove("hi"));
+      host.querySelectorAll('.band[data-idx="' + m.i + '"]').forEach(n => n.classList.add("hi"));
+      host.classList.add("hov");
+    });
+    tip.appendChild(btn);
+  }
+
+  /* hovering the first of the group already brings its band forward */
+  host.querySelectorAll(".band.hi").forEach(n => n.classList.remove("hi"));
+  host.querySelectorAll('.band[data-idx="' + members[0].i + '"]').forEach(n => n.classList.add("hi"));
+  host.classList.add("hov");
+
+  tip.hidden = false;
+  const box = card.getBoundingClientRect(), tb = tip.getBoundingClientRect();
+  let left = ev.clientX - box.left + 16, top = ev.clientY - box.top + 14;
+  if (left + tb.width > box.width) left = ev.clientX - box.left - tb.width - 16;
+  if (top + tb.height > box.height) top = ev.clientY - box.top - tb.height - 14;
+  tip.style.left = Math.max(0, left) + "px";
+  tip.style.top = Math.max(0, top) + "px";
+}
+
+/* delay before closing: the pointer must be able to cross the gap between
+   the point and the tooltip to go and click a row */
+function scheduleHideStripTip() {
+  clearTimeout(stripTipTimer);
+  stripTipTimer = setTimeout(hideStripTip, 220);
+}
+function hideStripTip() {
+  clearTimeout(stripTipTimer);
+  const t = $("strip-tip"), host = $("axes-strips");
+  if (t) t.hidden = true;
+  if (host) {
+    host.querySelectorAll(".band.hi").forEach(n => n.classList.remove("hi"));
+    host.classList.remove("hov");
+  }
+}
+
+/* Group mean: where the profiles sit taken as a whole. */
+function renderCentroid(computed, annot) {
+  if (!$("t-centroid").checked || computed.length < 2) return;
+  const mx = computed.reduce((a, r) => a + r.c.x, 0) / computed.length;
+  const my = computed.reduce((a, r) => a + r.c.y, 0) / computed.length;
+  const x = toSvgX(mx), y = toSvgY(my);
+  const g = el("g", {});
+  g.appendChild(el("circle", { class: "centroid", cx: x, cy: y, r: 8 }));
+  g.appendChild(el("line", { class: "centroid", x1: x - 12, y1: y, x2: x + 12, y2: y }));
+  g.appendChild(el("line", { class: "centroid", x1: x, y1: y - 12, x2: x, y2: y + 12 }));
+  const t = el("text", { class: "centroid-cap", x: x + 15, y: y + 3.5 });
+  t.textContent = L.mean(signed(Math.round(mx)), signed(Math.round(my)));
+  g.appendChild(t);
+  annot.appendChild(g);
+}
+
+/* Around the selection: the two proximity thresholds (derived, see SPACING)
+   and a line to the three nearest neighbours. */
+function renderAnnotations(computed, annot) {
+  if (!selection) return;
+  const origin = selection.kind === "profile"
+    ? (computed[selection.i] ? computed[selection.i].c : null)
+    : REFERENCES[selection.i];
+  if (!origin) return;
+
+  const ox = toSvgX(origin.x), oy = toSvgY(origin.y);
+  annot.appendChild(el("circle", { class: "sel-disc", cx: ox, cy: oy, r: 50 }));
+  for (const [d, r] of [[NEAR_LIMIT, NEAR_LIMIT * 2.5], [FAR_LIMIT, FAR_LIMIT * 2.5]]) {
+    annot.appendChild(el("circle", { class: "sel-ring", cx: ox, cy: oy, r }));
+    const t = el("text", { class: "sel-ring-cap", x: ox, y: oy - r - 3, "text-anchor": "middle" });
+    t.textContent = d;
+    annot.appendChild(t);
+  }
+
+  const near = (selection.kind === "profile"
+    ? rankParties(origin).map(o => REFERENCES.find(r => r.name === o.name))
+    : rankProfiles(origin, computed).map(o => computed[o.i].c)
+  ).slice(0, 3);
+
+  for (const n of near) {
+    if (!n) continue;
+    annot.appendChild(el("line", { class: "link-line",
+      x1: ox, y1: oy, x2: toSvgX(n.x), y2: toSvgY(n.y) }));
+  }
+}
+
+/* The distance panel: every distance, not only the shortest. */
+function renderDetail(computed) {
+  const wrap = $("detail-wrap");
+  const tbody = document.querySelector("#detail-table tbody");
+  const hint = $("detail-hint");
+  const title = $("detail-title");
+  const col = $("detail-col");
+  tbody.replaceChildren();
+
+  if (!selection) {
+    wrap.hidden = true;
+    hint.hidden = false;
+    $("detail-id").hidden = true;
+    title.textContent = L.distances;
+    return;
+  }
+
+  const isProfile = selection.kind === "profile";
+  const origin = isProfile ? computed[selection.i] : { p: REFERENCES[selection.i] };
+  if (!origin) { selection = null; wrap.hidden = true; hint.hidden = false; return; }
+
+  const rows = isProfile ? rankParties(origin.c) : rankProfiles(REFERENCES[selection.i], computed);
+  const label = isProfile ? origin.p.alias : REFERENCES[selection.i].name;
+
+  title.replaceChildren(document.createTextNode(
+    isProfile ? L.distancesOf : L.profilesNear));
+  const strong = document.createElement("span");
+  strong.textContent = label;
+  title.appendChild(strong);
+
+  col.textContent = isProfile ? L.colParty : L.colProfile;
+  hint.hidden = true;
+  wrap.hidden = false;
+
+  /* identity card: flag, motto read off the screenshot, computed concepts */
+  const card = $("detail-id");
+  card.replaceChildren();
+  if (isProfile) {
+    const p = origin.p;
+    card.appendChild(flagEl(p, "lg"));
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const d = document.createElement("p");
+    d.className = "d";
+    d.textContent = p.slogan ? p.slogan.join(" · ") : L.noMotto;
+    if (!p.slogan) d.style.color = "var(--text-3)";
+    meta.append(d, conceptsEl(p));
+    card.appendChild(meta);
+    card.hidden = false;
+  } else {
+    card.hidden = true;
+  }
+
+  if (!rows.length) {
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 6; td.className = "empty";
+    td.textContent = L.nothingToCompare;
+    tr.appendChild(td); tbody.appendChild(tr);
+    return;
+  }
+
+  const max = Math.max(...rows.map(r => r.d), 1);
+
+  rows.forEach((r, n) => {
+    const tr = document.createElement("tr");
+    if (!isProfile && selection.kind === "party") tr.dataset.idx = String(r.i);
+
+    const tdRank = document.createElement("td");
+    tdRank.className = "rank";
+    tdRank.textContent = String(n + 1);
+    tr.appendChild(tdRank);
+
+    const tdName = document.createElement("td");
+    tdName.append(document.createTextNode(r.name));
+    if (n === 0) {
+      const pill = document.createElement("span");
+      pill.className = "fit-pill" + (r.d > FAR_LIMIT ? " far-note" : "");
+      pill.textContent = " · " + fitPhrase(r.d);
+      tdName.appendChild(pill);
+    }
+    if (r.note) tdName.title = r.note;
+    tr.appendChild(tdName);
+
+    const tdBar = document.createElement("td");
+    tdBar.className = "bar-cell";
+    const bar = document.createElement("div");
+    bar.className = "bar" + (r.d > FAR_LIMIT ? " far" : "");
+    bar.style.width = Math.max(2, Math.round((r.d / max) * 100)) + "%";
+    tdBar.appendChild(bar);
+    tr.appendChild(tdBar);
+
+    for (const v of [String(r.d), signed(Math.round(r.dx)), signed(Math.round(r.dy))]) {
+      const td = document.createElement("td");
+      td.className = "num";
+      td.textContent = v;
+      tr.appendChild(td);
+    }
+
+    if (!isProfile) {
+      tr.style.cursor = "pointer";
+      tr.addEventListener("click", () => select("profile", r.i));
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+/* ---------------------------------------------------------------- survol --- */
+
+function wireHover(computed) {
+  const tip = $("tip");
+  const plot = document.querySelector(".plot");
+
+  const show = (idx, clientX, clientY) => {
+    const { p, c } = computed[idx];
+    const fam = nearestFamily(c.x, c.y);
+
+    tip.replaceChildren();
+    const b = document.createElement("b");
+    b.textContent = p.alias;
+    tip.appendChild(b);
+
+    const dl = document.createElement("dl");
+    const rows = [
+      [L.tipEcon, signed(c.x)],
+      [L.tipSocial, signed(c.y)
+        + (c.y > 0 ? L.suffixAuthor : c.y < 0 ? L.suffixLibert : "")],
+      [L.tipSov, signed(c.sov)],
+      [L.tipEcol, signed(c.ecol)]
+    ];
+    if (c.method) rows.push([L.tipMethod, c.method]);
+    for (const [k, v] of rows) {
+      const dt = document.createElement("dt"); dt.textContent = k;
+      const dd = document.createElement("dd"); dd.textContent = v;
+      dl.append(dt, dd);
+    }
+    tip.appendChild(dl);
+
+    if (p.slogan) {
+      const dv = document.createElement("p");
+      dv.className = "near";
+      dv.textContent = p.slogan.join(" · ");
+      tip.appendChild(dv);
+    }
+    const ct = document.createElement("p");
+    ct.className = "near";
+    ct.textContent = (window.PolitiExtract ? PolitiExtract.keyConcepts(p, 3) : [])
+      .map(c => L.pole[c.key]).join(" · ") || L.noMarkedAxis;
+    tip.appendChild(ct);
+
+    const near = document.createElement("p");
+    near.className = "near";
+    near.textContent = fam.d > FAR_LIMIT
+      ? L.nearestFar + fam.name + " (" + fam.d + ")"
+      : L.nearest + fam.name + " (" + L.proximity + fam.fit + ")";
+    tip.appendChild(near);
+
+    tip.hidden = false;
+
+    const box = plot.getBoundingClientRect();
+    const tb = tip.getBoundingClientRect();
+    let left = clientX - box.left + 16;
+    let top  = clientY - box.top + 16;
+    if (left + tb.width > box.width) left = clientX - box.left - tb.width - 16;
+    if (top + tb.height > box.height) top = clientY - box.top - tb.height - 16;
+    tip.style.left = Math.max(0, left) + "px";
+    tip.style.top  = Math.max(0, top) + "px";
+
+    document.querySelectorAll("#points-layer g, #profiles-table tbody tr")
+      .forEach(n => n.classList.toggle("on", n.dataset.idx === String(idx)));
+  };
+
+  const hide = () => {
+    tip.hidden = true;
+    document.querySelectorAll(".on").forEach(n => n.classList.remove("on"));
+  };
+
+  $("points-layer").querySelectorAll("g").forEach(g => {
+    const idx = Number(g.dataset.idx);
+    const hit = g.querySelector(".hit");
+    g.addEventListener("pointermove", e => show(idx, e.clientX, e.clientY));
+    g.addEventListener("pointerleave", hide);
+    hit.addEventListener("focus", () => {
+      const r = hit.getBoundingClientRect();
+      show(idx, r.left + r.width / 2, r.top + r.height / 2);
+    });
+    hit.addEventListener("blur", hide);
+  });
+}
+
+/* ------------------------------------------------------------ formulaire --- */
+
+function buildForm() {
+  const box = $("axis-fields");
+  box.replaceChildren();
+
+  const head = document.createElement("div");
+  head.className = "axis-row";
+  const hp = document.createElement("div");
+  hp.className = "poles";
+  hp.style.color = "var(--text-3)";
+  hp.style.fontSize = "0.72rem";
+  hp.textContent = L.formAxisHead;
+  const h1 = document.createElement("div"); h1.className = "col-head"; h1.textContent = L.formColLeft;
+  const h2 = document.createElement("div"); h2.className = "col-head"; h2.textContent = L.formColRight;
+  head.append(hp, h1, h2);
+  box.appendChild(head);
+
+  for (const a of AXES) {
+    const row = document.createElement("div");
+    row.className = "axis-row";
+    row.dataset.axis = a.neg[0] + "-" + a.pos[0];
+
+    const poles = document.createElement("div");
+    poles.className = "poles";
+    const e1 = document.createElement("em"); e1.textContent = a.neg[1];
+    const e2 = document.createElement("em"); e2.textContent = a.pos[1];
+    poles.append(e1, document.createTextNode(" ↔ "), e2);
+    row.appendChild(poles);
+
+    for (const [key, label] of [a.neg, a.pos]) {
+      const inp = document.createElement("input");
+      inp.type = "number";
+      inp.id = "p-" + key;
+      inp.min = "0"; inp.max = "100"; inp.step = "1";
+      inp.value = "0";
+      inp.setAttribute("aria-label", label + " (%)");
+      inp.addEventListener("input", () => checkRow(row, a));
+      row.appendChild(inp);
+    }
+    box.appendChild(row);
+  }
+}
+
+const val = key => {
+  const n = Number($("p-" + key).value);
+  return Number.isFinite(n) ? clamp(Math.round(n), 0, 100) : 0;
+};
+
+function checkRow(row, a) {
+  row.classList.toggle("over", val(a.neg[0]) + val(a.pos[0]) > 100);
+}
+
+function readForm() {
+  const alias = $("p-alias").value.trim();
+  const err = $("form-error");
+  const fail = msg => { err.textContent = msg; err.hidden = false; return null; };
+  err.hidden = true;
+
+  if (!alias) return fail(L.errNoAlias);
+  if (profiles.some(p => p.alias.toLowerCase() === alias.toLowerCase()))
+    return fail(L.errDuplicate(alias));
+
+  const over = AXES.filter(a => val(a.neg[0]) + val(a.pos[0]) > 100);
+  if (over.length)
+    return fail(L.errOverHundred(over.map(a => a.neg[1] + " ↔ " + a.pos[1]).join(", ")));
+
+  const p = { alias };
+  let any = false;
+  for (const a of AXES) {
+    const lo = val(a.neg[0]), hi = val(a.pos[0]);
+    if (lo === 0 && hi === 0) continue;   /* axis left blank: we do not invent a value for it */
+    p[a.neg[0]] = lo;
+    p[a.pos[0]] = hi;
+    any = true;
+  }
+  if (!any) return fail(L.errNoAxis);
+
+  /* The flag only follows if the values on screen are still the ones read from
+     the screenshot: a profile edited by hand must not carry the flag of a
+     result that no longer matches. */
+  if (pendingCapture) {
+    const same = AXES.every(a =>
+      val(a.neg[0]) === (pendingCapture.values[a.neg[0]] || 0) &&
+      val(a.pos[0]) === (pendingCapture.values[a.pos[0]] || 0));
+    if (same) { p.flag = pendingCapture.flag; p.source = pendingCapture.source; }
+  }
+  return p;
+}
+
+/* ------------------------------------------------------------- wiring --- */
+
+document.getElementById("add-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const p = readForm();
+  if (!p) return;
+  overlay.added.push(p);
+  saveOverlay();
+  rebuild();
+  render();
+  e.target.reset();
+  pendingCapture = null;
+  captureFeedback(null, null);
+  document.querySelectorAll(".axis-row.over").forEach(r => r.classList.remove("over"));
+  $("p-alias").focus();
+});
+
+$("clear-btn").addEventListener("click", () => {
+  document.getElementById("add-form").reset();
+  pendingCapture = null;
+  captureFeedback(null, null);
+  $("form-error").hidden = true;
+  document.querySelectorAll(".axis-row.over").forEach(r => r.classList.remove("over"));
+});
+
+$("reset-btn").addEventListener("click", () => {
+  overlay = { hidden: [], added: [] };
+  saveOverlay();
+  rebuild();
+  render();
+});
+
+["t-refs", "t-reflabels", "t-labels", "t-centroid"].forEach(id =>
+  $(id).addEventListener("change", render)
+);
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && selection) { selection = null; render(); }
+});
+
+/* clicking the chart background clears the selection */
+$("compass").addEventListener("click", e => {
+  if (selection && !e.target.closest("#points-layer g, #refs-layer g")) {
+    selection = null;
+    render();
+  }
+});
+
+/* ------------------------------------------------ screenshot import ---
+   Same extraction code as the command line (tools/politi-dissect.js), so what
+   is read here and what `node tools/extract.js` writes cannot diverge. We fill
+   the form rather than adding straight away, so the values go through the same
+   validation and stay correctable. */
+let pendingCapture = null;
+
+function aliasFromFileName(name) {
+  const base = name.replace(/\.[^.]+$/, "").replace(/[-_]?\d{4}$/, "");
+  return base.split(/[-_\s]+/).filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") || base;
+}
+
+function captureFeedback(kind, text, flag) {
+  const box = $("capture-ok");
+  box.replaceChildren();
+  if (!text) { box.hidden = true; return; }
+  if (flag) box.appendChild(flagEl({ flag, alias: "capture" }, "lg"));
+  const span = document.createElement("span");
+  span.className = kind === "ok" ? "who" : "";
+  if (kind !== "ok") span.style.color = "var(--warn)";
+  span.textContent = text;
+  box.appendChild(span);
+  box.hidden = false;
+}
+
+function readCapture(file) {
+  if (!window.PolitiExtract) {
+    captureFeedback("err", L.errNoExtractor);
+    return;
+  }
+  const fr = new FileReader();
+  fr.onerror = () => captureFeedback("err", L.errUnreadable);
+  fr.onload = () => {
+    const img = new Image();
+    img.onerror = () => captureFeedback("err", L.errNotImage);
+    img.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const ctx = c.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(img, 0, 0);
+      let data;
+      try { data = ctx.getImageData(0, 0, c.width, c.height); }
+      catch (_) { captureFeedback("err", L.errPixels); return; }
+
+      let res;
+      try { res = PolitiExtract.extract(data); }
+      catch (e) { captureFeedback("err", L.errExtract(e.message)); return; }
+      if (!res.ok) {
+        captureFeedback("err", L.errUnrecognised(res.warnings.join(" ; ")));
+        return;
+      }
+
+      /* the flag, re-cropped from the canvas */
+      let flag = null;
+      const g = res.geometry;
+      if (g.flag) {
+        const fc = document.createElement("canvas");
+        fc.width = 160; fc.height = Math.max(24, Math.round(160 * g.flag.h / g.flag.w));
+        fc.getContext("2d").drawImage(c, g.flag.x, g.flag.y, g.flag.w, g.flag.h,
+                                      0, 0, fc.width, fc.height);
+        try { flag = fc.toDataURL("image/png"); } catch (_) { flag = null; }
+      }
+
+      const alias = aliasFromFileName(file.name);
+      $("p-alias").value = alias;
+      for (const a of AXES) {
+        $("p-" + a.neg[0]).value = String(res.values[a.neg[0]] ?? 0);
+        $("p-" + a.pos[0]).value = String(res.values[a.pos[0]] ?? 0);
+      }
+      document.querySelectorAll(".axis-row").forEach(r => r.classList.remove("over"));
+      $("form-error").hidden = true;
+
+      /* The motto is text: it cannot be read here without OCR. The CLI gets it via
+         tesseract; in the browser we leave the field empty rather than invent
+         something. Key concepts, on the other hand, are computed. */
+      pendingCapture = { flag, source: file.name, values: { ...res.values } };
+      const concepts = PolitiExtract.keyConcepts(res.values, 3)
+        .map(x => L.pole[x.key]).join(" · ");
+      captureFeedback("ok", L.captureOk(alias, concepts)
+        + (res.warnings.length ? "  (" + res.warnings.join(" ; ") + ")" : ""), flag);
+    };
+    img.src = fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+
+const drop = $("drop");
+$("drop-input").addEventListener("change", e => {
+  if (e.target.files && e.target.files[0]) readCapture(e.target.files[0]);
+  e.target.value = "";
+});
+["dragenter", "dragover"].forEach(ev =>
+  drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(ev =>
+  drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => {
+  const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f) readCapture(f);
+});
+
+/* Fills the static markup from the locale. Every node carrying data-i18n gets
+   its text, data-i18n-title its tooltip, data-i18n-placeholder its placeholder.
+   Nothing below hardcodes copy, so another language is one more object in
+   LOCALES plus the matching <html lang>. */
+function applyLocale() {
+  document.querySelectorAll("[data-i18n]").forEach(n => {
+    const v = L[n.dataset.i18n];
+    if (typeof v === "string") n.textContent = v;
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach(n => {
+    const v = L[n.dataset.i18nTitle];
+    if (typeof v === "string") n.title = v;
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(n => {
+    const v = L[n.dataset.i18nPlaceholder];
+    if (typeof v === "string") n.placeholder = v;
+  });
+}
+applyLocale();
+
+/* Labels that depend on the number of references: written once, from the
+   data, so adding a party cannot leave a wrong figure in the copy. */
+$("detail-hint").textContent = L.detailHint(REFERENCES.length);
+
+/* the strip tooltip stays open while the pointer is over it */
+(function () {
+  const t = $("strip-tip");
+  if (!t) return;
+  t.addEventListener("pointerenter", () => clearTimeout(stripTipTimer));
+  t.addEventListener("pointerleave", hideStripTip);
+})();
+
+buildForm();
+renderChrome();
+render();
+</script>
+</body>
+</html>

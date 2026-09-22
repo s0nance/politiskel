@@ -1,0 +1,6 @@
+# Anything derived from personal answers stays local.
+politi-results/
+index.html
+profiles-data.js
+
+.DS_Store
