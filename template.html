@@ -126,6 +126,17 @@
   .controls label { display: inline-flex; align-items: center; gap: 7px;
                     font-size: 0.85rem; color: var(--text-2); cursor: pointer; }
   .controls input[type=checkbox] { accent-color: var(--series-1); width: 15px; height: 15px; }
+  .controls select {
+    padding: 5px 8px; font: inherit; font-size: 0.85rem; cursor: pointer;
+    background: var(--bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+  }
+  .controls select:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+  /* the country decides what everything else is compared against, where the
+     rest of the row only toggles what is drawn: a rule keeps the two apart
+     without the stretch of empty bar that pushing them to opposite ends left */
+  .controls .country { font-weight: 600; color: var(--text);
+                       padding-right: 18px; border-right: 1px solid var(--border); }
 
   .layout {
     display: grid;
@@ -777,6 +788,8 @@ window.POLITI_PROFILES = [];
   <p class="subtitle" data-i18n="subtitle"></p>
 
   <div class="controls">
+    <label class="country"><span data-i18n="optCountry"></span>
+      <select id="country"></select></label>
     <label><input type="checkbox" id="t-refs" checked> <span data-i18n="optRefs"></span></label>
     <label><input type="checkbox" id="t-reflabels" checked> <span data-i18n="optRefLabels"></span></label>
     <label><input type="checkbox" id="t-labels" checked> <span data-i18n="optLabels"></span></label>
@@ -809,7 +822,7 @@ window.POLITI_PROFILES = [];
           </span>
           <span>
             <svg width="12" height="12" aria-hidden="true"><path d="M6 1.5 10.5 6 6 10.5 1.5 6Z" fill="none" stroke="var(--ref-ink)" stroke-width="1.5"/></svg>
-            <span data-i18n="legendParties"></span>
+            <span id="legend-parties"></span>
           </span>
         </div>
 
@@ -847,22 +860,18 @@ window.POLITI_PROFILES = [];
               auquel il manque un axe PolitiScales reste comparable aux autres.
             </p>
             <p>
-              <strong>Repères partisans.</strong> Dix des quatorze partis sont placés d'après le
-              <em>Chapel Hill Expert Survey 2024</em> (609 politologues, 279 partis européens),
-              dont les échelles <code>lrecon</code> et <code>galtan</code> sont exactement les deux
-              dimensions de cette boussole : position = (score 0-10 − 5) × 20. Les quatre autres
-              (Lutte ouvrière, NPA, Debout la France, La France humaniste) n'y figurent pas et
-              restent des estimations à la main, calées sur l'échelle des dix premières.
+              <strong>Repères partisans.</strong> <span id="method-refs"></span>
+              Le <em>Chapel Hill Expert Survey 2024</em> (609 politologues, 279 partis
+              européens) donne les échelles <code>lrecon</code> et <code>galtan</code>, qui sont
+              exactement les deux dimensions de cette boussole : position = (score 0-10 − 5) × 20.
               Ce ne sont pas des scores PolitiScales : les deux échelles restent de natures
               différentes, et les distances profil-parti gardent donc une part d'approximation.
               <strong>Proximité.</strong> Les deux seuils ne sont pas fixés à la main : ils
-              se déduisent des repères eux-mêmes. On mesure l'espacement médian entre un parti
-              et son voisin le plus proche, puis « proche » vaut jusqu'à cet espacement et
-              « modérée » jusqu'à une fois et demie. Au-delà, le nom du parti le moins lointain
-              reste affiché, mais la page signale qu'aucun n'est vraiment proche. L'échiquier
-              français reste creux en son centre — le plus grand vide sur l'axe économique
-              sépare La France humaniste de MoDem — donc les profils centristes ont
-              mécaniquement des rattachements plus lâches que les profils marqués.
+              se déduisent des repères eux-mêmes, et sont donc recalculés à chaque changement de
+              pays. On mesure l'espacement médian entre un parti et son voisin le plus proche,
+              puis « proche » vaut jusqu'à cet espacement et « modérée » jusqu'à une fois et
+              demie. Au-delà, le nom du parti le moins lointain reste affiché, mais la page
+              signale qu'aucun n'est vraiment proche. <span id="method-gap"></span>
             </p>
             <p>
               L'axe souverainiste (nationalisme ↔ internationalisme) est fortement transversal
@@ -1021,8 +1030,12 @@ window.POLITI_PROFILES = [];
    and the static markup is filled from the same table through data-i18n
    attributes. The language is taken from <html lang>.
 
-   Two things deliberately stay out: party names, which are proper nouns, and
-   the numbers themselves. */
+   Two things deliberately stay out: the numbers themselves, and everything
+   that lives in the reference tables — party names, which are proper nouns,
+   along with the country names and the one-line notes that sit next to them.
+   Those notes are prose about specific parties, they belong with the
+   coordinates they describe, and splitting them off would leave two tables to
+   keep in step. A second language would translate COUNTRIES, not this. */
 const LOCALES = {
   fr: {
     /* poles, keyed by axis side — also used for the concept pills */
@@ -1113,12 +1126,33 @@ const LOCALES = {
     navTest: "Passer le test", navSource: "Code source",
     subtitle: "Projection des profils PolitiScales sur deux axes — gauche-droite économique "
       + "et libertaire-autoritaire — et comparaison avec la position des principales forces "
-      + "politiques françaises.",
-    optRefs: "Repères partis français", optRefLabels: "Étiquettes des repères",
+      + "politiques du pays choisi.",
+    optCountry: "Pays de référence",
+    optRefs: "Repères partis", optRefLabels: "Étiquettes des repères",
     optLabels: "Étiquettes des profils",
     optMean: "Moyenne du groupe", optMeanWhere: "(carte et axes)",
     chartTitle: "Positions calculées",
-    legendProfiles: "Profils", legendParties: "Partis français (repères)",
+    legendProfiles: "Profils", legendParties: c => "Partis — " + c + " (repères)",
+    partyAria: n => "Parti " + n,
+    /* Written from the tables rather than by hand: the previous copy claimed
+       "dix des quatorze partis" against a list that held fifteen. */
+    methodRefsAll: (country, n) =>
+      "Les " + n + " repères " + country + " sont tous placés d'après le CHES 2024.",
+    methodRefsMixed: (country, ches, est, names) =>
+      "Sur les " + (ches + est) + " repères " + country + ", " + ches + " sont placés d'après le "
+      + "CHES 2024. Les " + est + " autres (" + names + ") n'y figurent pas — trop petits, plus "
+      + "récents, ou hors du champ de l'enquête — et restent des estimations à la main, calées "
+      + "sur l'échelle des premiers.",
+    methodRefsEstimated: (country, n, why) =>
+      "Les " + n + " repères " + country + " sont tous des estimations à la main, calées sur "
+      + "l'échelle du CHES : " + why,
+    /* Party names are quoted rather than dropped straight into the sentence:
+       French would need "de l'Aile" before a vowel, and no table of labels is
+       going to carry its own elision. */
+    methodGap: (lo, hi, d) =>
+      "Le plus grand vide sur l'axe économique sépare « " + lo + " » de « " + hi + " » (" + d
+      + " points) : un profil qui tombe dans cet intervalle a mécaniquement un rattachement "
+      + "plus lâche qu'un profil marqué.",
     tableTitle: "Profils enregistrés", addTitle: "Ajouter un profil",
     stripsTitle: "Les huit axes, un par un",
     dropTitle: "Déposer une capture PolitiScales",
@@ -1169,31 +1203,114 @@ const AXES = [
 /* Axis wording comes from the locale, so AXES itself stays language-neutral. */
 AXES.forEach(a => { a.neg[1] = L.axis[a.neg[0]]; a.pos[1] = L.axis[a.pos[0]]; });
 
-/* Reference parties, on the same [-100, 100] scales as the profiles. */
-const REFERENCES = [
-  /* Positions from the Chapel Hill Expert Survey 2024 (609 political
-     scientists, 279 European parties), converted from its 0-10 `lrecon`
-     (economic left-right) and `galtan` scales: value = (score − 5) × 20.
-     Those are exactly the two dimensions of this compass.
-     The four entries marked "estimate" are absent from CHES — too small, or
-     created after the survey — and remain hand estimates, calibrated against
-     the scale of the other ten. */
-  { name: "Lutte ouvrière",     x: -92, y: -30, note: "Trotskisme, anticapitalisme de classe — estimation (hors CHES)" },
-  { name: "NPA / Rév. perm.",   x: -88, y: -70, note: "Anticapitalisme, forte ouverture sociétale — estimation (hors CHES)" },
-  { name: "La France insoumise",x: -82, y: -64, note: "Rupture écosocialiste, populisme de gauche — CHES 2024" },
-  { name: "PCF",                x: -75, y: -29, note: "Étatisme économique, sensibilité souverainiste — CHES 2024" },
-  { name: "Les Écologistes",    x: -54, y: -66, note: "Écologie politique, libéralisme culturel — CHES 2024" },
-  { name: "Parti socialiste",   x: -33, y: -45, note: "Social-démocratie réformiste — CHES 2024" },
-  { name: "La France humaniste", x: -15, y: -22, note: "Villepin, 2025 — gaullisme social : patrimoine et successions taxés, mais déficit sous 3 %, simplification par ordonnances. Estimation (postérieur au CHES), placement incertain" },
-  { name: "MoDem",              x:  14, y: -10, note: "Centrisme social, europhilie — CHES 2024" },
-  { name: "Renaissance",        x:  24, y: -18, note: "Libéralisme économique, centre-droit — CHES 2024" },
-  { name: "Horizons",           x:  36, y:   6, note: "Droite libérale gestionnaire — CHES 2024" },
-  { name: "Debout la France",   x:  38, y:  62, note: "Souverainisme gaulliste — estimation (hors CHES)" },
-  { name: "Rassemblement national", x: 20, y: 67, note: "Étatisme social ciblé, nationalisme — CHES 2024" },
-  { name: "Les Républicains",   x:  56, y:  44, note: "Droite conservatrice, ordre et marché — CHES 2024" },
-  { name: "Nouvelle Énergie",   x:  62, y:  32, note: "Lisnard — droite libérale et décentralisatrice : choc de dérégulation, retraite par capitalisation, migration hors contrôle des cours européennes. Estimation (hors CHES)" },
-  { name: "Reconquête",         x:  67, y:  82, note: "Libéralisme économique, national-conservatisme — CHES 2024" }
+/* Reference parties, on the same [-100, 100] scales as the profiles, grouped
+   by country. A profile means nothing in the absolute: it only reads against
+   the forces it could actually vote for, and those change at every border.
+
+   `src` carries where a pair of coordinates comes from, so the page can count
+   its own sources instead of a hardcoded sentence going stale:
+     "ches" — read off the Chapel Hill Expert Survey 2024 (609 political
+              scientists, 279 European parties), converted from its 0-10
+              `lrecon` (economic left-right) and `galtan` (libertarian-
+              authoritarian) scales: value = (score − 5) × 20. Those are
+              exactly the two dimensions of this compass, which is why the
+              conversion is a rescaling and nothing more.
+     "est"  — hand estimate, calibrated against the CHES entries around it.
+
+   What does NOT transpose is the meaning of "a party". CHES rates parties, so
+   in a multi-party system each reference is one. The United States are not in
+   CHES — no expert survey on these scales covers them — and two parties that
+   each span half the board would place nobody: the American table therefore
+   rates the main tendencies as well, and says so. Comparing a profile to
+   "the Democratic Party" and to "its progressive wing" are two different
+   questions, and only the second one is informative there. */
+const COUNTRIES = [
+  {
+    code: "fr", name: "France", parties: [
+      { name: "Lutte ouvrière",     x: -92, y: -30, src: "est",  note: "Trotskisme, anticapitalisme de classe" },
+      { name: "NPA / Rév. perm.",   x: -88, y: -70, src: "est",  note: "Anticapitalisme, forte ouverture sociétale" },
+      { name: "La France insoumise",x: -82, y: -64, src: "ches", note: "Rupture écosocialiste, populisme de gauche" },
+      { name: "PCF",                x: -75, y: -29, src: "ches", note: "Étatisme économique, sensibilité souverainiste" },
+      { name: "Les Écologistes",    x: -54, y: -66, src: "ches", note: "Écologie politique, libéralisme culturel" },
+      { name: "Parti socialiste",   x: -33, y: -45, src: "ches", note: "Social-démocratie réformiste" },
+      { name: "La France humaniste",x: -15, y: -22, src: "est",  note: "Villepin, 2025 — gaullisme social : patrimoine et successions taxés, mais déficit sous 3 %, simplification par ordonnances. Postérieur au CHES, placement incertain" },
+      { name: "MoDem",              x:  14, y: -10, src: "ches", note: "Centrisme social, europhilie" },
+      { name: "Rassemblement national", x: 20, y: 67, src: "ches", note: "Étatisme social ciblé, nationalisme" },
+      { name: "Renaissance",        x:  24, y: -18, src: "ches", note: "Libéralisme économique, centre-droit" },
+      { name: "Horizons",           x:  36, y:   6, src: "ches", note: "Droite libérale gestionnaire" },
+      { name: "Debout la France",   x:  38, y:  62, src: "est",  note: "Souverainisme gaulliste" },
+      { name: "Les Républicains",   x:  56, y:  44, src: "ches", note: "Droite conservatrice, ordre et marché" },
+      { name: "Nouvelle Énergie",   x:  62, y:  32, src: "est",  note: "Lisnard — droite libérale et décentralisatrice : choc de dérégulation, retraite par capitalisation, migration hors contrôle des cours européennes" },
+      { name: "Reconquête",         x:  67, y:  82, src: "ches", note: "Libéralisme économique, national-conservatisme" }
+    ]
+  },
+  {
+    code: "de", name: "Allemagne", parties: [
+      { name: "Die Linke",          x: -73, y: -54, src: "ches", note: "Gauche radicale, redistribution et ouverture sociétale" },
+      { name: "BSW",                x: -44, y:  41, src: "ches", note: "Scission de Die Linke — étatisme économique et conservatisme culturel, le quadrant que l'échiquier français laisse vide" },
+      { name: "Grüne",              x: -33, y: -68, src: "ches", note: "Écologie politique, libéralisme culturel" },
+      { name: "SPD",                x: -31, y: -28, src: "ches", note: "Social-démocratie de gouvernement" },
+      { name: "Freie Wähler",       x:  29, y:  34, src: "ches", note: "Centre-droit localiste, ancré en Bavière" },
+      { name: "CDU",                x:  32, y:  31, src: "ches", note: "Démocratie chrétienne, centre-droit de gouvernement" },
+      { name: "CSU",                x:  35, y:  51, src: "ches", note: "Aile bavaroise de la CDU, nettement plus conservatrice" },
+      { name: "FDP",                x:  52, y: -36, src: "ches", note: "Libéralisme de marché ET libéralisme culturel — sans équivalent français de ce poids" },
+      { name: "AfD",                x:  53, y:  88, src: "ches", note: "Droite radicale nationaliste" }
+    ]
+  },
+  {
+    code: "it", name: "Italie", parties: [
+      { name: "Sinistra Italiana",  x: -72, y: -66, src: "ches", note: "Gauche radicale, composante de l'alliance AVS" },
+      { name: "Europa Verde",       x: -56, y: -66, src: "ches", note: "Écologistes, composante de l'alliance AVS" },
+      { name: "M5S",                x: -43, y: -35, src: "ches", note: "Mouvement 5 étoiles — populisme devenu social, longtemps hors du clivage" },
+      { name: "Partito Democratico",x: -41, y: -53, src: "ches", note: "Centre-gauche social-démocrate" },
+      { name: "SVP",                x:   0, y:   2, src: "ches", note: "Parti régionaliste sud-tyrolien, au centre des deux axes" },
+      { name: "Azione",             x:   4, y: -31, src: "ches", note: "Centre libéral réformateur" },
+      { name: "Più Europa",         x:   5, y: -73, src: "ches", note: "Centre libéral, fortement europhile" },
+      { name: "Fratelli d'Italia",  x:  28, y:  83, src: "ches", note: "Droite nationale-conservatrice, au gouvernement depuis 2022" },
+      { name: "Lega",               x:  36, y:  77, src: "ches", note: "Droite radicale, régionaliste à l'origine" },
+      { name: "Forza Italia",       x:  48, y:  21, src: "ches", note: "Droite libérale-conservatrice" }
+    ]
+  },
+  {
+    code: "uk", name: "Royaume-Uni", parties: [
+      { name: "Green Party",        x: -58, y: -71, src: "ches", note: "Écologistes d'Angleterre et du pays de Galles" },
+      { name: "Plaid Cymru",        x: -42, y: -31, src: "ches", note: "Nationalisme gallois de gauche" },
+      { name: "SNP",                x: -38, y: -44, src: "ches", note: "Indépendantisme écossais, social-démocrate" },
+      { name: "Labour",             x: -28, y: -33, src: "ches", note: "Travaillisme de gouvernement, recentré" },
+      { name: "Liberal Democrats",  x: -14, y: -65, src: "ches", note: "Centre libéral, très libéral culturellement" },
+      { name: "Conservative Party", x:  49, y:  43, src: "ches", note: "Conservatisme de marché" },
+      { name: "Reform UK",          x:  68, y:  82, src: "ches", note: "Droite radicale issue du Brexit" }
+    ]
+  },
+  {
+    /* No CHES survey covers the United States: CHES-USA is announced but
+       unreleased. Every position here is an estimate, and the table is the
+       one that mixes parties and tendencies — see the note above. */
+    code: "us", name: "États-Unis",
+    why: "aucune enquête CHES ne couvre les États-Unis (CHES-USA est annoncée, pas publiée). "
+       + "Le bipartisme y rend d'ailleurs le parti seul peu parlant : les deux grands partis "
+       + "agrègent des positions très écartées, donc leurs principaux courants sont placés à "
+       + "part. À lire comme un ordre de grandeur, pas comme une mesure.",
+    parties: [
+      { name: "Green Party",              x: -65, y: -62, src: "est", note: "Écosocialisme, hors des deux grands partis" },
+      { name: "Démocrates progressistes", x: -52, y: -52, src: "est", note: "Sanders, Ocasio-Cortez — assurance maladie publique, Green New Deal" },
+      { name: "Parti démocrate",          x: -16, y: -30, src: "est", note: "Centre-gauche à l'échelle européenne : le marché y est peu contesté, le libéralisme culturel assumé" },
+      { name: "Républicains modérés",     x:  55, y:  30, src: "est", note: "Républicanisme d'avant 2016 : marché, défense, conservatisme social tempéré" },
+      { name: "Parti républicain",        x:  62, y:  72, src: "est", note: "Marché, conservatisme social et national" },
+      { name: "Parti libertarien",        x:  88, y: -32, src: "est", note: "Marché sans entrave et libertés individuelles — quadrant que personne n'occupe en Europe à ce niveau" }
+    ]
+  }
 ];
+
+/* The active country. Everything downstream keeps reading REFERENCES, which is
+   rebound rather than rebuilt, so the rendering code never learns that
+   countries exist. */
+let country = COUNTRIES[0];
+let REFERENCES = country.parties;
+
+/* Provenance is shown, not hidden: a hand estimate and a surveyed position
+   should not look alike in a tooltip. */
+const noteOf = r => r.note + (r.src === "ches" ? " — CHES 2024" : " — estimation");
 
 /* Starting profiles: the ones extracted from politi-results/ by
    tools/extract.js. They carry all 8 PolitiScales axes, where the original
@@ -1295,7 +1412,7 @@ function nearestFamily(x, y) {
     .sort((a, b) => a.d - b.d);
   const best = ranked[0];
   const fit = fitOf(best.d);
-  return { name: best.r.name, note: best.r.note, d: Math.round(best.d), fit, second: ranked[1] };
+  return { name: best.r.name, note: noteOf(best.r), d: Math.round(best.d), fit, second: ranked[1] };
 }
 
 /* { kind: "profile" | "party", i } — whatever is currently being compared. */
@@ -1310,23 +1427,73 @@ let selection = null;
 
    Deriving them keeps them from going stale: pinned at 20 and 32 against the
    old positions, they were wrong the moment the CHES data was adopted, which
-   tightens the set. */
-const SPACING = (() => {
-  const nn = REFERENCES.map((r, i) => Math.min(...REFERENCES
+   tightens the set.
+
+   They are recomputed on every country change for the same reason: a country
+   whose parties crowd together earns tighter thresholds than one spread over
+   the whole board, and the French spacing would describe neither. */
+function spacingOf(refs) {
+  if (refs.length < 2) return 0;
+  const nn = refs.map((r, i) => Math.min(...refs
     .filter((_, j) => j !== i).map(o => Math.hypot(o.x - r.x, o.y - r.y))));
   nn.sort((a, b) => a - b);
   return nn[nn.length >> 1];
-})();
-const NEAR_LIMIT = Math.round(SPACING);
-const FAR_LIMIT = Math.round(SPACING * 1.5);
+}
+let NEAR_LIMIT = 0, FAR_LIMIT = 0;
 const fitOf = d => (d <= NEAR_LIMIT ? L.fit.near : d <= FAR_LIMIT ? L.fit.moderate : L.fit.far);
 const fitPhrase = d => (d <= FAR_LIMIT ? L.proximity + fitOf(d) : L.noCloseParty);
+
+/* The chosen country is a preference, not data: it is kept apart from the
+   profile overlay so that clearing one never clears the other. */
+const COUNTRY_KEY = "politicompass.country.v1";
+
+function setCountry(code) {
+  const found = COUNTRIES.find(c => c.code === code);
+  if (found) country = found;
+  REFERENCES = country.parties;
+  const s = spacingOf(REFERENCES);
+  NEAR_LIMIT = Math.round(s);
+  FAR_LIMIT = Math.round(s * 1.5);
+  /* `selection` holds an index into the previous table, which now points at
+     another party or at nothing at all. */
+  if (selection && selection.kind === "party") selection = null;
+}
+
+/* The widest hole on the economic axis, which is where a profile gets attached
+   to a party it is not really close to. Measured rather than asserted: the
+   copy used to name the French centre gap, which said nothing about Germany. */
+function widestEconGap() {
+  const sorted = REFERENCES.slice().sort((a, b) => a.x - b.x);
+  let best = null;
+  for (let i = 1; i < sorted.length; i++) {
+    const d = sorted[i].x - sorted[i - 1].x;
+    if (!best || d > best.d) best = { d, lo: sorted[i - 1], hi: sorted[i] };
+  }
+  return best;
+}
+
+/* Every piece of copy that names the country or counts its references. */
+function applyCountry() {
+  $("legend-parties").textContent = L.legendParties(country.name);
+  $("detail-hint").textContent = L.detailHint(REFERENCES.length);
+
+  const ches = REFERENCES.filter(r => r.src === "ches");
+  const est = REFERENCES.filter(r => r.src !== "ches");
+  $("method-refs").textContent =
+      !ches.length ? L.methodRefsEstimated(country.name, REFERENCES.length, country.why || "")
+    : !est.length  ? L.methodRefsAll(country.name, ches.length)
+    : L.methodRefsMixed(country.name, ches.length, est.length,
+                        est.map(r => r.name).join(", "));
+
+  const gap = widestEconGap();
+  $("method-gap").textContent = gap ? L.methodGap(gap.lo.name, gap.hi.name, gap.d) : "";
+}
 
 /* Distances from a point to every party, nearest first. dx/dy are signed:
    "this party sits 34 points to your right". */
 function rankParties(c) {
   return REFERENCES
-    .map(r => ({ name: r.name, note: r.note,
+    .map(r => ({ name: r.name, note: noteOf(r),
                  d: Math.round(Math.hypot(r.x - c.x, r.y - c.y)),
                  dx: r.x - c.x, dy: r.y - c.y }))
     .sort((a, b) => a.d - b.d);
@@ -1589,7 +1756,7 @@ function render() {
       g.dataset.party = String(ri);
       if (selection && selection.kind === "party" && selection.i === ri) g.classList.add("sel");
       const hit = el("circle", { class: "ref-hit", cx: x, cy: y, r: 13, tabindex: "0",
-                                 role: "button", "aria-label": "Parti " + r.name });
+                                 role: "button", "aria-label": L.partyAria(r.name) });
       g.appendChild(hit);
       g.appendChild(el("path", {
         class: "ref-mark",
@@ -1597,7 +1764,7 @@ function render() {
            " L " + x + " " + (y + 5.5) + " L " + (x - 5.5) + " " + y + " Z"
       }));
       const title = el("title", {});
-      title.textContent = r.name + " — " + r.note;
+      title.textContent = r.name + " — " + noteOf(r);
       g.appendChild(title);
 
       if (showRefLabels) {
@@ -2466,9 +2633,30 @@ function applyLocale() {
 }
 applyLocale();
 
-/* Labels that depend on the number of references: written once, from the
-   data, so adding a party cannot leave a wrong figure in the copy. */
-$("detail-hint").textContent = L.detailHint(REFERENCES.length);
+/* Country picker. The labels that name the country or count its references are
+   written from the data, so adding a party cannot leave a wrong figure in the
+   copy — and a country change rewrites them all through applyCountry(). */
+(function () {
+  const sel = $("country");
+  for (const c of COUNTRIES) {
+    const o = document.createElement("option");
+    o.value = c.code;
+    o.textContent = c.name;
+    sel.appendChild(o);
+  }
+  let saved = null;
+  try { saved = localStorage.getItem(COUNTRY_KEY); } catch (_) { /* private browsing */ }
+  setCountry(saved || COUNTRIES[0].code);
+  sel.value = country.code;
+
+  sel.addEventListener("change", () => {
+    setCountry(sel.value);
+    try { localStorage.setItem(COUNTRY_KEY, country.code); } catch (_) { /* quota, or private browsing */ }
+    applyCountry();
+    render();
+  });
+})();
+applyCountry();
 
 /* the strip tooltip stays open while the pointer is over it */
 (function () {
